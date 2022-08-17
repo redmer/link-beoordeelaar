@@ -120,6 +120,8 @@ main.app {
   display: flex;
   flex-direction: column;
   background-color: var(--card-bg-color);
+  font-family: inherit;
+  font-size: inherit;
   color: var(--card-color);
   border-radius: 1em;
   cursor: pointer;
@@ -180,6 +182,7 @@ dl.subject-properties dd {
 dl.subject-properties dd code {
   color: var(--anti-theme-hue);
   font-size: 1.2em;
+  word-wrap: break-word;
 }
 
 dl.subject-properties dt,

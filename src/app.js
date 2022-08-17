@@ -16,6 +16,7 @@ export class PropertiesTable extends Component {
           // If there are allowed-keys, then skip if key is in them
           if (props.keys.length > 0 && props.keys.indexOf(key) == -1)
             return html``;
+
           // If the value is None, N/A, etc., skip
           if (["", undefined, null].indexOf(rawvalue) != -1) return html``;
           const value = String(rawvalue);
@@ -33,112 +34,88 @@ export class PropertiesTable extends Component {
 
 export class AnswerOption extends Component {
   static defaultProps = {
-    options: [{ name: "yes" }, { name: "no" }],
+    options: [],
   };
 
   render(props, state) {
     const answers = props.options;
     return html`
-      <form>
-        <div class="option-list">
-          ${answers.map((answer) => {
-            return html` <label class="option" id="opt-${answer.value}">
-              <input type="radio" name="opt" value="${answer.value}" />
-              <h2 class="option-title">${answer.name}</h2>
-              <p class="option-description">${answer.description}</p>
-            </label>`;
-          })}
-        </div>
-      </form>
+      <div class="option-list">
+        ${answers.map((answer) => {
+          return html` <button
+            type="submit"
+            class="option"
+            id="opt-${answer.value}"
+            value=${answer.value}
+          >
+            <h2 class="option-title">${answer.name}</h2>
+            <p class="option-description">${answer.description}</p>
+          </button>`;
+        })}
+      </div>
     `;
   }
 }
 
-/** The PageFrame provides the header, main, footer of the app.
- *
- * From configuration
- */
-export class PageFrame extends Component {
-  render(props, state) {
-    const repo = `redmer/link-beoordeelaar`;
-    const help = props.config
-      ? props.config.help
-      : "https://rdmr.eu/link-beoordeelaar/help-nl";
-
-    return html`
-      <header class="colophon">
-        <div>
-          <a target="_blank" href="https://github.com/${repo}"> ${repo} </a>
-        </div>
-        <div>
-          <a target="_blank" href="${help}">HELP</a>
-        </div>
-      </header>
-      <main class="app">${props.children}</main>
-      <footer class="diagnostics">
-        <details open>
-          <summary>Diagnostica</summary>
-          <code id="debug-diagnostics">${JSON.stringify(props.config)}</code>
-        </details>
-      </footer>
-    `;
-  }
-}
-
-export class App extends Component {
+export class QuestionnaireApp extends Component {
   async componentWillMount() {
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+
+    const sessionKey = params.session;
+    if (!sessionKey)
+      throw new Error(
+        "1753c02d-503b-4422-8a5e-2e8464cadf17: no session URL provided"
+      );
+
+    const configFileUrl = atob(sessionKey);
+    this.setState({ configurationURL: configFileUrl });
+
     try {
-      // Concept: in query-request, payload=abc1234 contains a
-      // base64-encoded url to a session configuration JSON
-      const params = new Proxy(new URLSearchParams(window.location.search), {
-        get: (searchParams, prop) => searchParams.get(prop),
-      });
-
-      const sessionKey = params.session;
-      if (!sessionKey)
-        throw new Error("Provide session URL in query parameter");
-
-      const configFileUrl = atob(sessionKey);
-      this.setState({ configurationURL: configFileUrl });
-
+      // Fetch and parse from URL
       const configDict = await this.getConfiguration({
         url: configFileUrl,
       });
 
       this.setState({ configuration: configDict });
     } catch (err) {
-      console.error(err);
       this.setState({
-        message: html`Could not load configuration: ${err.message}`,
+        message: html`<code>c0095f9e-f9cb-4cbc-aefd-d88ef94e5e37</code> Could
+          not load configuration: ${err.message}`,
       });
+      console.error(err);
     }
   }
 
   async getConfiguration({ url }) {
-    console.info(`Discovered configuration file at: ${url}`);
+    console.info(`Fetching configuration file at: ${url}`);
     const response = await fetch(new URL(url));
     return JSON.parse(await response.text());
   }
 
+  chooseOption(event) {
+    event.preventDefault();
+    console.log(`Fire -chooseOption by ${event.submitter.value}`);
+  }
+
   render(props, state) {
-    return html`<div id="link-beoordelaar">
-      <${PageFrame} config=${state.configuration}>
-        <header class="measure"> 
-          <h1>Beoordeel</h1>
-          <p>
-            Beoordeel de link geopend in de popup door op een van de opties
-            te klikken. Als je het beoordelen moet onderbreken, kun je op deze
-            computer in deze browser binnen een week doorgaan.
-          </p>
-          <p>${state.message}</p>
-        </header>
-        <main class="options-container">
+    return html` <header class="measure">
+        <h1>Beoordeel</h1>
+        <p>
+          Beoordeel de link geopend in de popup door op een van de opties te
+          klikken. Als je het beoordelen moet onderbreken, kun je op deze
+          computer in deze browser binnen een week doorgaan.
+        </p>
+        <p>${state.message}</p>
+      </header>
+      <main class="options-container">
+        <form onSubmit=${this.chooseOption}>
           <${AnswerOption} options=${state.configuration?.answerOptions} />
-        </main>
-        <footer>
-          <${PropertiesTable} subject=${state.configuration?.subjects[5]} />
-        </footer>
-      </${PageFrame}>
-    </div>`;
+        </form>
+      </main>
+      <footer>
+        <${PropertiesTable} subject=${state.configuration?.subjects[4]} />
+      </footer>`;
   }
 }

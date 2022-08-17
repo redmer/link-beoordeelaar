@@ -28,8 +28,8 @@ Per te beoordelen link, krijg je een aantal opties.
 Welke opties dat zijn, hangt af van de instellingen voor jouw sessie.
 Klik op een optie om door te gaan naar de volgende link.
 
-Indien beschikbaar, staan er ook nog andere gegevens over de link bovenaan.
+Indien beschikbaar, staan er ook nog andere gegevens over de link onderaan.
 Dan kan je helpen de link te beoordelen.
 
 Kom je er niet uit?
-Druk onderin op `Diagnostics` en stuur wat verschijnt naar je contactpersoon.
+Druk onderin op `Diagnostica` en stuur wat verschijnt naar je contactpersoon.
