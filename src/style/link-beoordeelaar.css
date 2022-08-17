@@ -1,15 +1,22 @@
 :root {
-  --theme-color: 145;
+  --theme-hue: 145;
+  --anti-theme-hue: calc(var(--theme-hue) - 90);
 
-  --bg-color: hsl(var(--theme-color), 50%, 30%);
+  --bg-color: hsl(var(--theme-hue), 50%, 38%);
   --color: white;
 
-  --card-bg-color: hsl(var(--theme-color), 50%, 50%);
-  --card-bg-hover: hsl(var(--theme-color), 50%, 45%);
+  --card-bg-color: hsl(var(--theme-hue), 50%, 38%);
+  --card-border: hsl(var(--theme-hue), 62%, 25%);
+  --card-bg-hover: hsl(var(--theme-hue), 62%, 25%);
   --card-color: white;
+  --card-active-bg-color: hsl(var(--theme-hue), 50%, 12%);
+  --card-active-color: white;
 
-  --behind-bg-color: hsl(var(--theme-color), 50%, 15%);
+  --behind-bg-color: hsl(var(--theme-hue), 50%, 12%);
   --behind-color: white;
+
+  --focus-bg-color: hsl(var(--anti-theme-hue), 75%, 62%);
+  --focus-color: black;
 
   --font-stack: "Franklin Gothic", sans-serif;
 }
@@ -23,17 +30,27 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  line-height: 1.4;
+  line-height: 1.45rem;
+}
+
+::selection {
+  background-color: var(--focus-bg-color);
+  color: var(--focus-color);
 }
 
 a[href] {
   color: white;
+  text-decoration-line: none;
+}
+
+a[href]:hover {
+  text-decoration-line: underline;
 }
 
 header.colophon,
 footer.diagnostics {
   background-color: var(--behind-bg-color);
-  padding: 1em;
+  padding: 1em 2em;
   display: flex;
   justify-content: space-between;
   font-size: small;
@@ -42,22 +59,16 @@ footer.diagnostics {
 
 footer.diagnostics {
   margin-top: auto;
-}
-
-footer.diagnostics summary {
-  color: var(--card-bg-color);
+  justify-content: end;
 }
 
 footer.diagnostics #debug-diagnostics {
   font-family: "Consolas", Courier, monospace;
-}
-
-.colophon div {
-  margin: 0 1em;
+  word-break: break-all;
 }
 
 main.app {
-  margin: 0 1em;
+  margin: 0 2em;
   flex-grow: 1;
   align-items: stretch;
   flex-shrink: 0;
@@ -90,6 +101,7 @@ main.app {
   grid-template-columns: 1fr;
   grid-auto-flow: row dense;
   gap: 1em;
+  user-select: none;
 }
 
 @media screen and (min-width: 30em) {
@@ -113,13 +125,20 @@ main.app {
   cursor: pointer;
   align-items: center;
   padding: 1em;
-  transition: all 0.2s ease-in-out;
-  border: 2px solid var(--card-bg-color);
+  transition: all 0.2s ease-out;
+  border: 2px solid var(--card-border);
+  box-shadow: 0 10px 10px hsla(0, 100%, 0%, 15%),
+    inset 0 1px hsla(var(--anti-theme-hue), 75%, 62%, 75%);
 }
 
 .option:hover {
   background-color: var(--card-bg-hover);
   border: 2px solid var(--behind-bg-color);
+}
+
+.option:active {
+  background-color: var(--card-active-bg-color);
+  color: var(--card-active-color);
 }
 
 .option input[type="radio"] {
@@ -128,13 +147,46 @@ main.app {
 
 /* Properties table */
 
-table th[scope="row"] {
-  text-align: end;
+.keep-together {
+  break-inside: avoid-column;
 }
 
-table th,
-table td {
-  width: 1%;
-  padding: 0.5rem;
-  vertical-align: top;
+dl.subject-properties {
+  columns: 3;
+}
+
+@media screen and (max-width: 45em) {
+  dl.subject-properties {
+    columns: 1;
+  }
+}
+
+.kv-pair {
+  transition: all 0.2s ease-out;
+  border-radius: 0.5rem;
+  padding-left: 1em;
+  margin-bottom: 0.5rem;
+}
+
+/** Highlight row value upon hover  */
+.kv-pair:hover {
+  background-color: var(--card-bg-hover);
+}
+
+dl.subject-properties dd {
+  margin-left: 1em;
+}
+
+dl.subject-properties dd code {
+  color: var(--anti-theme-hue);
+  font-size: 1.2em;
+}
+
+dl.subject-properties dt,
+dl.subject-properties dd {
+  display: inline-block;
+}
+
+dl.subject-properties dt {
+  font-weight: bold;
 }

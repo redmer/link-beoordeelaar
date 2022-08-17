@@ -9,6 +9,16 @@
       "type": "string",
       "enum": ["nl", "en"]
     },
+    "help": {
+      "$comment": "Link to more explanantion",
+      "type": "string",
+      "format": "uri"
+    },
+    "bestBefore": {
+      "$comment": "End date, displayed in interface, not forced in code",
+      "type": "string",
+      "format": "date"
+    },
     "subjects": {
       "$comment": "The individual subjects of a session. The objects must have minimally the property `uri`.",
       "type": "array",
