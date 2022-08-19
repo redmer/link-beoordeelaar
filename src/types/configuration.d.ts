@@ -1,23 +1,38 @@
-class Configuration {
-  lang?: string;
-  help?: string;
-  bestBefore?: string;
-  subjects: Subject[];
-  keys?: keyof Subject[];
-  answerOptions?: Answer[];
+declare class ConfigurationInput {
+  answerOptions: Answer[];
+  lang: string;
   reporting: {
-    endpoint?: string;
-    email?: string;
-    keys?: keyof Subject[];
+    email: string;
+    endpoint: string;
+    keys: string[];
   };
+  subjects: Subject[];
+  help?: string;
+  introductionText?: string;
+  closingText?: string;
+  keys?: string[];
 }
 
-class Subject {
+declare type Configuration = Required<ConfigurationInput>;
+
+declare type DefaultConfiguration = Omit<
+  Configuration,
+  "subjects" | "reporting"
+>;
+
+declare class InterfaceParameters {
+  language: string;
+  helpLink: string;
+  completeByDate: Date | null;
+  possibleAnswers: Answer[];
+}
+
+declare class Subject {
   url: string;
   [key: string]: string | number | null;
 }
 
-class Answer {
+declare class Answer {
   name: string;
   description?: string;
   value?: string;

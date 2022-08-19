@@ -23,3 +23,8 @@ This error is caused by one of the following:
 1. The session JSON at the specified location could not be parsed
 
 Solution: check that your users' browsers can acess the JSON and check the welformedness of the JSON file.
+
+#### `d626ac4b-fbef-46bf-af96-50c1d6ac926b`
+
+The JSON payload was found and syntactically correct, but some properties were missing or of the wrong type.
+Use the JSON-Schema file at `configuration.schema.json` to check your session configuration.
