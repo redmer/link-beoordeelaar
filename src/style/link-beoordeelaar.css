@@ -118,12 +118,14 @@ main.app {
 
 .option {
   display: flex;
+  position: relative;
   flex-direction: column;
   background-color: var(--card-bg-color);
   font-family: inherit;
   font-size: inherit;
   color: var(--card-color);
-  border-radius: 1em;
+  border-radius: 1rem;
+  overflow: hidden;
   cursor: pointer;
   align-items: center;
   padding: 1em;
@@ -138,7 +140,8 @@ main.app {
   border: 2px solid var(--behind-bg-color);
 }
 
-.option:active {
+.option:active,
+.option-active {
   background-color: var(--card-active-bg-color);
   color: var(--card-active-color);
 }
@@ -192,4 +195,18 @@ dl.subject-properties dd {
 
 dl.subject-properties dt {
   font-weight: bold;
+}
+
+.mnemonic {
+  display: block;
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  padding: 0.5rem 0.5rem;
+  background-color: var(--focus-bg-color);
+  color: var(--focus-color);
+  border-bottom-left-radius: 0.5rem;
+  font-size: large;
+  font-weight: bold;
+  text-transform: uppercase;
 }

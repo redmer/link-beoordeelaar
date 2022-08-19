@@ -3,9 +3,6 @@ import {
   render,
 } from "https://unpkg.com/htm/preact/standalone.module.js";
 import { QuestionnaireApp } from "./app.js";
-import SinglePage from "./page.js";
+import Frame from "./frame.js";
 
-render(
-  html`<${SinglePage}><${QuestionnaireApp} /></${SinglePage}>`,
-  document.body
-);
+render(html`<${Frame}><${QuestionnaireApp} /></${Frame}>`, document.body);
