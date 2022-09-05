@@ -1,23 +1,30 @@
 /// <reference path="../types/configuration.d.ts" />
 import { html } from "htm/preact";
 import { Component } from "preact";
-import { AnswerOption, PropertiesTable } from "../view/page.js";
-import Questionnaire from "../model/questionnaire.js";
-import label from "../util/lang.js";
+import { AnswerOption, PropertiesTable } from "../view/page";
+import Questionnaire from "../model/questionnaire";
+import label from "../util/lang";
+import delay from "../util/delay";
 
-export class QuestionnaireApp extends Component {
+declare class QuestionnaireAppState {
+  answers: Answer[];
+  configuration: Configuration;
+  configurationURL: string;
+  error: Error;
+  currentSubject: Subject;
+}
+
+declare class QuestionnaireAppProps {}
+
+export class QuestionnaireApp extends Component<
+  QuestionnaireAppProps,
+  QuestionnaireAppState
+> {
   static defaultProps = {
-    /** @type {Answer} */
-    answers: [],
-
-    /** @type {Configuration} */
-    configuration: {},
-
-    /** @type {string} */
+    answers: [] as Answer[],
+    configuration: {} as Configuration,
     configurationURL: "",
-
-    /** @type {Error} */
-    error: undefined,
+    error: undefined as unknown as Error,
   };
 
   async componentDidMount() {
@@ -38,7 +45,7 @@ export class QuestionnaireApp extends Component {
 
     try {
       /** @type {Configuration} */
-      const configDict = await this.getConfiguration({
+      const configDict: Configuration = await this.getConfiguration({
         url: configFileUrl,
       });
       this.setState({ configuration: configDict });
@@ -61,14 +68,22 @@ export class QuestionnaireApp extends Component {
   async chooseOption(event) {
     event.preventDefault();
     console.log(`Fire -chooseOption by ${event.submitter.value}`);
-    this.setState({ answers: this.state.answers.push() });
+    this.setState({
+      answers: [
+        ...this.state.answers,
+        {
+          name: event.submitter.value,
+          value: event.submitter.value,
+        },
+      ],
+    });
   }
 
-  async findMnemonic(/** @type {KeyboardEvent} */ event) {
+  async findMnemonic(event: KeyboardEvent) {
     event.preventDefault();
     console.log(`Keyboard pressed: ${event.key}`);
     /** @type {HTMLButtonElement | null} */
-    const target = document.querySelector(
+    const target: HTMLButtonElement | null = document.querySelector(
       `button[data-key-equivalent="${event.key}"]`
     );
     if (!target) return;

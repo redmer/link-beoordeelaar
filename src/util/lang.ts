@@ -1,7 +1,7 @@
-//@ts-check
-/** Add translation */
 export const UI_TRANSLATIONS = {
+  /* Add languages here */
   en: {
+    /* Add translations here */
     DIAGNOSTICS: "Diagnostics",
     HELP_URL: "https://rdmr.eu/link-beoordeelaar/help/enduser/en",
     LANGUAGE: "English",
@@ -29,20 +29,18 @@ export const UI_TRANSLATIONS = {
   },
 };
 
-/**
- *
- * @returns {readonly string[]}
- */
-export function prefLangs() {
+/** Document interface or User interface preferred language */
+export function prefLangs(): readonly string[] {
   return [document.body.lang || "en"];
 }
 
 /**
+ * Localized label.
  *
- * @param {string} key The lookup key
+ * @param key The lookup key
  * @returns The translated label, or the untranslated key if not found.
  */
-export default function label(key) {
+export default function label(key: string): string {
   for (const l of prefLangs()) {
     if (
       UI_TRANSLATIONS.hasOwnProperty(l) &&

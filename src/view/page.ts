@@ -16,7 +16,8 @@ export class PropertiesTable extends Component {
             return html``;
 
           // If the value is None, N/A, etc., skip
-          if (["", undefined, null].indexOf(rawvalue) != -1) return html``;
+          if (["", undefined, null].indexOf(rawvalue as any) != -1)
+            return html``;
 
           const value = String(rawvalue);
 
@@ -95,7 +96,6 @@ function AnswerOptionButton(props) {
     <p class="option-description">${props.description}</p>
   </button>`;
 }
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 class QuestionnairePage extends Component {
   render() {
@@ -109,7 +109,13 @@ class QuestionnaireFinalPage extends Component {
   }
 }
 
-class QuestionnaireInitialPage extends Component {
+class QuestionnaireOpeningPage extends Component {
+  render() {
+    return html``;
+  }
+}
+
+class QuestionnaireSessionLessPage extends Component {
   render() {
     return html``;
   }

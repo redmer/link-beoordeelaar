@@ -2,16 +2,21 @@
 /// <reference path="../types/configuration.d.ts" />
 
 import label from "../util/lang";
-import keep from "../util/filtered-object";
+import pick from "../util/filtered-object";
 import slugify from "../util/slugify";
 
 export default class Questionnaire {
+  configurationURL: URL;
+  _answers: any[];
+  isLoaded: boolean;
+  _data: any;
+
   /**
    * Model class that loads and proxies the configuration data from the url.
    *
    * @param {string} url The URL to GET the configuration from.
    */
-  constructor(url) {
+  constructor(url: string) {
     this.configurationURL = new URL(url);
     this._answers = [];
   }
@@ -22,8 +27,7 @@ export default class Questionnaire {
       redirect: "follow",
       cache: cache ? "default" : "no-cache",
     });
-    /** @type {ConfigurationInput} */
-    const parsedConfig = JSON.parse(await response.text());
+    const parsedConfig: ConfigurationInput = JSON.parse(await response.text());
 
     if (!parsedConfig.hasOwnProperty("subjects")) {
       throw new SchemaValidationError("`subjects` array missing");
@@ -72,7 +76,7 @@ export default class Questionnaire {
    *
    * @returns {Generator<{ url: string; [key: string]: string | number | null }, void, unknown>}
    */
-  *subjects() {
+  *subjects(): Generator<Subject, void, unknown> {
     if (!this._data) throw new PropertyAccessError();
 
     if (this._data?.keys.length == 0) {
@@ -81,7 +85,7 @@ export default class Questionnaire {
     }
 
     for (const subj of this._data.subjects) {
-      yield* keep(subj, { allowed: ["url", ...this._data.keys] });
+      yield* pick(subj, { allowed: ["url", ...this._data.keys] });
       // yield Object.keys(subj)
       //   .filter((key) => key == "url" || this._data.keys.includes(key))
       //   .reduce((filteredObj, key) => {
@@ -103,7 +107,7 @@ export default class Questionnaire {
     // Prepare payload, by getting reporting keys for the Subjects
     let subjects = this._data.subjects;
     if (this._data.reporting.keys) {
-      subjects = keep(subjects, this._data.reporting.keys);
+      subjects = pick(subjects, this._data.reporting.keys);
       // for (const subj of this._data.subjects) {
       //   subjects.push(
       //     Object.keys(subj)
@@ -122,8 +126,8 @@ export default class Questionnaire {
 
 /** Error when .accessing before calling -load */
 export class PropertyAccessError extends Error {
-  constructor(message) {
-    super(`Property access before calling Questionnaire#load`);
+  constructor(message = "Property access before calling Questionnaire#load") {
+    super(message);
     this.name = "PropertyAccessError";
   }
 }
@@ -139,10 +143,10 @@ export class SchemaValidationError extends Error {
 }
 
 export class ReportingError extends Error {
-  constructor(message) {
-    super(
-      `Programming error: cannot report over HTTP, as no endpoint is supplied`
-    );
+  constructor(
+    message = "Programming error: cannot report over HTTP, as no endpoint is supplied"
+  ) {
+    super(message);
     this.name = "ReportingError";
   }
 }
