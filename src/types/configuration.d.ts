@@ -1,4 +1,4 @@
-declare class ConfigurationInput {
+declare class QuestionnaireData {
   answerOptions: Answer[];
   lang: string;
   reporting: {
@@ -13,7 +13,7 @@ declare class ConfigurationInput {
   keys?: string[];
 }
 
-declare type Configuration = Required<ConfigurationInput>;
+declare type Configuration = Required<QuestionnaireData>;
 
 declare type DefaultConfiguration = Omit<
   Configuration,

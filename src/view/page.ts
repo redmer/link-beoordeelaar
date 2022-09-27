@@ -1,5 +1,6 @@
 import { html } from "htm/preact";
-import { Component } from "preact";
+import { Component, ComponentChild, RenderableProps } from "preact";
+import label from "../util/lang";
 
 export class PropertiesTable extends Component {
   static defaultProps = {
@@ -97,26 +98,133 @@ function AnswerOptionButton(props) {
   </button>`;
 }
 
-class QuestionnairePage extends Component {
-  render() {
-    return html``;
+declare class QuestionnairePageProps {
+  onSubmit: CallableFunction;
+  answerOptions: Answer[];
+  subject: Subject;
+  index: number;
+  max: number;
+}
+declare class QuestionnairePageState {}
+
+export class QuestionnairePage extends Component<
+  QuestionnairePageProps,
+  QuestionnairePageState
+> {
+  render(
+    props?: RenderableProps<QuestionnairePageProps, any>,
+    state?: Readonly<QuestionnairePageState>
+  ) {
+    return html`<div class="page">
+      <${PageHeader}
+        title="${label("APP_TITLE")}"
+        desc="${label("INTRODUCTION")}"
+        index=${props.index}
+        max=${props.max}
+      />
+      <main class="options-container">
+        <form onSubmit=${props.onSubmit}>
+          <${AnswerOption} options=${props.answerOptions} />
+        </form>
+      </main>
+      <footer>
+        <${PropertiesTable} subject=${props.subject} />
+      </footer>
+    </div> `;
   }
 }
 
-class QuestionnaireFinalPage extends Component {
-  render() {
-    return html``;
+declare class QuestionnaireFinalPageProps {
+  closingText?: string;
+  reportEmail: string;
+  reportBody: string;
+}
+
+export class QuestionnaireFinalPage extends Component<
+  QuestionnaireFinalPageProps,
+  null
+> {
+  render(props: QuestionnaireFinalPageProps) {
+    return html`<div class="page">
+      <${PageHeader}
+        title="${label("FINAL_TITLE")}"
+        desc="${props.closingText ?? label("CLOSING_REMARKS_MAIL")}"
+      />
+      <main class="measure">
+        <textarea rows="20" cols="60" readonly>${props.reportBody}</textarea>
+        <div class="mailto-cta">
+          <a
+            target="_blank"
+            href="mailto:${props.reportEmail}?subject=Linkbeoordeelaar"
+            >${props.reportEmail}</a
+          >
+        </div>
+      </main>
+    </div>`;
   }
 }
 
-class QuestionnaireOpeningPage extends Component {
-  render() {
-    return html``;
+declare class QuestionnaireOpeningPageProps {
+  onSubmit: CallableFunction;
+}
+
+export class QuestionnaireOpeningPage extends Component<
+  QuestionnaireOpeningPageProps,
+  any
+> {
+  render(props: QuestionnaireOpeningPageProps) {
+    return html`<div class="page">
+      <${PageHeader}
+        title="${label("APP_TITLE")}"
+        desc="${label("INTRODUCTION_OPENING")}"
+      />
+      <main class="measure">
+        <form onSubmit=${props.onSubmit}>
+          <${AnswerOptionButton}
+            value="start"
+            mnemonic="Enter"
+            name=${label("START")}
+            description=${label("START_DESC")}
+          />
+        </form>
+      </main>
+    </div>`;
   }
 }
 
-class QuestionnaireSessionLessPage extends Component {
+export class QuestionnaireSessionlessPage extends Component {
   render() {
-    return html``;
+    return html`<div class="page">
+      <${PageHeader}
+        title="${label("APP_TITLE")}"
+        desc="${label("INTRODUCTION_SESSIONLESS")}"
+      />
+    </div>`;
   }
 }
+
+const PageHeader = (props: {
+  title: string;
+  desc: string;
+  index?: number;
+  max?: number;
+}) =>
+  html`<header class="measure">
+    <h1>${props.title}</h1>
+    <${Progress} index="${props.index}" max="${props.max}" />
+    <p>${props.desc}</p>
+  </header>`;
+
+const Progress = (props: { index: number; max: number }) => {
+  if (!props.max) return html``;
+  const percentage = props.index / props.max;
+
+  return html`
+    <h4>
+      <progress id="voortgang" value="${props.index}" max="${props.max}">
+        ${percentage.toFixed(0)}%
+      </progress>
+      <label for="voortgang">${props.index} / ${props.max}</label>
+    </h4>
+  `;
+};

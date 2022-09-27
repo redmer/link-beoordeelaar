@@ -40,7 +40,7 @@ export default class Frame extends Component {
     return html`<div id="link-beoordelaar">
       <${PageHeader} repo=${repo} help=${help} />
       <main class="app">${this.props.children}</main>
-      <${PageFooter} diagnostics=${console.logs} />
+      <${PageFooter} />
     </div>`;
   }
 }

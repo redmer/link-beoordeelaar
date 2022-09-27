@@ -210,3 +210,13 @@ dl.subject-properties dt {
   font-weight: bold;
   text-transform: uppercase;
 }
+
+.mailto-cta {
+  margin: 3rem auto;
+  font-size: xx-large;
+  text-align: center;
+}
+
+progress {
+  margin-inline-end: 0.5rem;
+}
