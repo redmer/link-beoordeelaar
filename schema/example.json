@@ -1,0 +1,5 @@
+{
+  "$schema": "./link-beoordelaar.json",
+  "urlsToJudge": ["https://crow.nl/", "https://rdmr.eu/"],
+  "allowedJudgements": [{ "name": "Moet over" }, { "name": "Mag gearchiveerd" }]
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$comment": "A schema to judge URLs by with <https://github.com/redmer/link-beoordelaar>.",
+  "type": "object",
+  "required": ["subjects", "reporting"],
+  "properties": {
+    "lang": {
+      "$comment": "The interface language",
+      "type": "string",
+      "enum": ["nl", "en"]
+    },
+    "help": {
+      "$comment": "Link to more explanantion",
+      "type": "string",
+      "format": "uri"
+    },
+    "bestBefore": {
+      "$comment": "End date, displayed in interface, not forced in code",
+      "type": "string",
+      "format": "date"
+    },
+    "subjects": {
+      "$comment": "The individual subjects of a session. The objects must have minimally the property `uri`.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": { "url": { "type": "string", "format": "uri" } },
+        "additionalProperties": true
+      }
+    },
+    "keys": {
+      "$comment": "Limit the subject's keys in the interface to those specified here. `url` is always used.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "answerOptions": {
+      "$comment": "The allowed answers per subject",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "value": { "type": "string" }
+        }
+      }
+    },
+    "reporting": {
+      "$comment": "The manner of reporting, either by email or endpoint",
+      "type": "object",
+      "oneOf": [{ "required": ["endpoint"] }, { "required": ["email"] }],
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "keys": {
+          "$comment": "Limit the subject's keys in the report to those specified here.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
