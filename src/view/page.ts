@@ -104,6 +104,7 @@ declare class QuestionnairePageProps {
   subject: Subject;
   index: number;
   max: number;
+  onClick: CallableFunction;
 }
 declare class QuestionnairePageState {}
 
@@ -121,6 +122,7 @@ export class QuestionnairePage extends Component<
         desc="${label("INTRODUCTION")}"
         index=${props.index}
         max=${props.max}
+        onClick=${props.onClick}
       />
       <main class="options-container">
         <form onSubmit=${props.onSubmit}>
@@ -208,12 +210,22 @@ const PageHeader = (props: {
   desc: string;
   index?: number;
   max?: number;
-}) =>
-  html`<header class="measure">
+  onClick?: CallableFunction;
+}) => {
+  console.info(props);
+  return html`<header class="measure">
     <h1>${props.title}</h1>
     <${Progress} index="${props.index}" max="${props.max}" />
-    <p>${props.desc}</p>
+    <p>
+      ${props.desc}
+      ${props.onClick
+        ? html`<button onClick=${props.onClick}>
+            ${label("REOPEN_POPUP")}
+          </button>`
+        : ""}
+    </p>
   </header>`;
+};
 
 const Progress = (props: { index: number; max: number }) => {
   if (!props.max) return html``;

@@ -1,5 +1,6 @@
 {
-  "$schema": "./link-beoordelaar.json",
-  "urlsToJudge": ["https://crow.nl/", "https://rdmr.eu/"],
-  "allowedJudgements": [{ "name": "Moet over" }, { "name": "Mag gearchiveerd" }]
+  "$schema": "./configuration.schema.json",
+  "subjects": [{ "url": "https://crow.nl/" }, { "url": "https://rdmr.eu/" }],
+  "reporting": { "email": "info@example.org" },
+  "allowedJudgements": [{ "name": "May stay" }, { "name": "May be archived" }]
 }

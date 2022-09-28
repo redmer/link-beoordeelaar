@@ -11,6 +11,7 @@ export const UI_TRANSLATIONS = {
     FINAL_TITLE: "Ready to send in",
     START: "Start",
     START_DESC: "Commence categorizing links",
+    REOPEN_POPUP: "Reopen popup window",
     INTRODUCTION: `Categorize the link that has opened in the popup window
       by choosing one of the following options. If you need to pause, you may
       resume categorizing within one week inside this very browser.`,
@@ -32,6 +33,7 @@ export const UI_TRANSLATIONS = {
     FINAL_TITLE: "Klaar om in te sturen",
     START: "Start",
     START_DESC: "Begin met beoordelen van links",
+    REOPEN_POPUP: "Heropen popupvenster",
     INTRODUCTION: `Beoordeel de link geopend in de popup door op een van de
       opties te klikken. Als je het beoordelen moet onderbreken, kun je op deze
       computer in deze browser binnen een week doorgaan. `,

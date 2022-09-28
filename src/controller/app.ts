@@ -100,7 +100,7 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
   start = async (event) => {
     event.preventDefault();
     this.popup = window.open(
-      this.state.data.subjects[0].url, // always at start
+      this.state.data.subjects[this.state.answers.length].url, // always at start
       this.POPUP_WINDOW,
       "toolbar=no,menubar=no,left=1,top=1"
     );
@@ -143,6 +143,7 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
 
     // Render the current subject
     return html`<${QuestionnairePage}
+      onClick=${this.start}
       onSubmit=${this.chooseOption}
       answerOptions=${state.data.answerOptions}
       subject=${state.data.subjects[state.answers.length]}
