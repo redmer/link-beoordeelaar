@@ -18,7 +18,7 @@ export const UI_TRANSLATIONS = {
       questionnaire you want filled out.`,
     INTRODUCTION_OPENING: `Categorize the links that open in a popup window, by
       choosing one of the provided options. Select START to begin.`,
-    CLOSING_REMARKS_MAIL: `Thank you for participating. You need to send your
+    CLOSING_REMARKS_MAIL: `Thank you for participating. Copy and send your
       results displayed below to the e-mail address displayed below that. 
       Otherwise, your response may not be recorded.`,
   },
@@ -39,8 +39,8 @@ export const UI_TRANSLATIONS = {
       verwijst naar de lijst van links die moeten worden beoordeeld.`,
     INTRODUCTION_OPENING: `Beoordeel de links die openen in een popup door op een
       van de opties te klikken. Druk op START om te beginnen.`,
-    CLOSING_REMARKS_MAIL: `Bedankt voor het meedoen. De resultaten die 
-      hieronder staan moet je opsturen naar het e-mailadres dat daar weer onder
+    CLOSING_REMARKS_MAIL: `Bedankt voor het meedoen. Kopieer de resultaten die 
+      hieronder staan en stuur ze naar het e-mailadres dat daar onder
       staat. Anders worden je resultaten niet meegenomen.`,
   },
 };

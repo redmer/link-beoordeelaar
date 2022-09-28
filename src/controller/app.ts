@@ -47,7 +47,18 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
         started: true,
       });
     }
+
+    window.addEventListener("popstate", this.navBack);
   }
+
+  navBack = async (event) => {
+    this.state.answers.pop();
+    this.setState({ answers: this.state.answers });
+    window.localStorage.setItem(
+      this.state.sessionKey,
+      JSON.stringify(this.state.answers)
+    );
+  };
 
   chooseOption = async (event) => {
     event.preventDefault();
@@ -60,6 +71,7 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
       },
     ];
     this.setState({ answers: newAnswersValue });
+    history.pushState({ answers: newAnswersValue }, "");
     window.localStorage.setItem(
       this.state.sessionKey,
       JSON.stringify(newAnswersValue)
@@ -111,7 +123,7 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
   };
 
   render(props: any, state: QuestionnaireAppState) {
-    console.log(state);
+    console.info(state);
     if (!state.data) {
       return html`<${QuestionnaireSessionlessPage} />`;
     }
