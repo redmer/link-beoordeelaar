@@ -1,10 +1,15 @@
 declare class QuestionnaireData {
   answerOptions: Answer[];
   lang: string;
+  translations: Record<string, string>;
   reporting: {
-    email: string;
-    endpoint: string;
-    keys: string[];
+    email?: string;
+    endpoint?: {
+      authorizationType: "bearer";
+      authorizationToken: string;
+      method: "post";
+      path: string;
+    };
   };
   subjects: Subject[];
   help?: string;

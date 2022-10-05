@@ -1,5 +1,6 @@
 import { html } from "htm/preact";
 import { Component } from "preact";
+import label from "../util/lang";
 
 export default class Frame extends Component {
   constructor(props) {
@@ -20,8 +21,7 @@ export default class Frame extends Component {
 
   render(props, state) {
     const repo = `redmer/link-beoordeelaar`;
-    const help =
-      props.config?.help ?? "https://rdmr.eu/link-beoordeelaar/help/enduser/nl";
+    const help = label("HELP_URL");
 
     if (state.hasError) {
       return html`<div id="link-beoordelaar">
@@ -59,11 +59,14 @@ function PageHeader(props) {
 }
 
 function PageFooter(props) {
+  const params = new URLSearchParams(window.location.search);
+  const sessionKey = params.get("session");
+  const diagnostics = window.localStorage.getItem(sessionKey);
   return html`
     <footer class="diagnostics">
       <details closed>
         <summary>Diagnostica</summary>
-        <code id="debug-diagnostics">${JSON.stringify(props.diagnostics)}</code>
+        <code id="debug-diagnostics">${diagnostics}</code>
       </details>
     </footer>
   `;

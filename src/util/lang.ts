@@ -3,7 +3,7 @@ export const UI_TRANSLATIONS = {
   en: {
     /* Add translations here */
     DIAGNOSTICS: "Diagnostics",
-    HELP_URL: "https://rdmr.eu/link-beoordeelaar/help/enduser/en",
+    HELP_URL: "https://rdmr.eu/link-beoordeelaar/docs/help/enduser/en",
     LANGUAGE: "English",
     CORRECT: "Correct",
     INCORRECT: "Incorrect",
@@ -25,7 +25,7 @@ export const UI_TRANSLATIONS = {
   },
   nl: {
     DIAGNOSTICS: "Diagnostica",
-    HELP_URL: "https://rdmr.eu/link-beoordeelaar/help/enduser/nl",
+    HELP_URL: "https://rdmr.eu/link-beoordeelaar/docs/help/enduser/nl",
     LANGUAGE: "Nederlands",
     CORRECT: "Correct",
     INCORRECT: "Incorrect",
@@ -43,13 +43,13 @@ export const UI_TRANSLATIONS = {
       van de opties te klikken. Druk op START om te beginnen.`,
     CLOSING_REMARKS_MAIL: `Bedankt voor het meedoen. Kopieer de resultaten die 
       hieronder staan en stuur ze naar het e-mailadres dat daar onder
-      staat. Anders worden je resultaten niet meegenomen.`,
+      staat. Anders worden je resultaten mogelijk niet meegenomen.`,
   },
 };
 
 /** Document interface or User interface preferred language */
 export function prefLangs(): readonly string[] {
-  return [document.body.lang || "en"];
+  return ["x-customized", document.body.lang, "en"];
 }
 
 /**
@@ -60,10 +60,7 @@ export function prefLangs(): readonly string[] {
  */
 export default function label(key: string): string {
   for (const l of prefLangs()) {
-    if (
-      UI_TRANSLATIONS.hasOwnProperty(l) &&
-      UI_TRANSLATIONS[l].hasOwnProperty(key)
-    )
+    if (UI_TRANSLATIONS[l] && UI_TRANSLATIONS[l].hasOwnProperty(key))
       return UI_TRANSLATIONS[l][key];
   }
   console.warn(`Translation for "${key}" not found`);

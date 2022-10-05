@@ -9,13 +9,15 @@ import {
 } from "../view/page";
 import delay from "../util/delay";
 import { Configuration } from "../model/config";
-import pick from "../util/filtered-object";
+import { UI_TRANSLATIONS } from "../util/lang";
+import { digest } from "../util/digest";
 
 declare class QuestionnaireAppState {
   sessionKey: string;
   answers: Answer[];
   data: QuestionnaireData;
   started: boolean;
+  answersSentViaEndpoint: boolean;
 }
 
 export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
@@ -31,6 +33,7 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
 
     const data = await Configuration.fetchQuestionnaire(sessionKey);
     document.body.lang = data.lang;
+    UI_TRANSLATIONS["x-customized"] = data?.translations;
 
     this.setState({
       sessionKey: sessionKey,
@@ -109,39 +112,78 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
 
   POPUP_WINDOW = "link-beoordelaar-popup";
 
-  answersBody = () => {
+  emailBody = () => {
     let subjects = this.state.data.subjects;
-    const zipped = subjects.map((s, i) => [s, this.state.answers[i]]);
-    return zipped.reduce(
-      (body: string, [subject, answer]: [Subject, Answer]) => {
-        const s = `${subject.url}`;
-        const a = `${answer.value}`;
-        return (body += `"${s}"\t"${a}"\n`);
-      },
-      "Results\n\n"
+    let answers = this.state.answers;
+
+    const payload = Configuration.answersPayload(subjects, answers);
+    return (
+      "Results\n\n" +
+      Object.entries(payload)
+        .map(([s, a]) => `"${btoa(s)}"\t"${a}"`)
+        .join("\n")
     );
+  };
+
+  postAnswers = async () => {
+    let subjects = this.state.data.subjects;
+    let answers = this.state.answers;
+
+    const payload = Configuration.answersPayload(subjects, answers);
+
+    // prevent double calls, when answers are unchanged but post-request is resend
+    if ("TextEncoder" in window) {
+      const digestSubjectAnswerPair = await digest(JSON.stringify(payload));
+      const hasSent = window.localStorage.getItem(digestSubjectAnswerPair);
+      if (hasSent) return;
+      window.localStorage.setItem(
+        digestSubjectAnswerPair,
+        JSON.stringify(answers.map((value) => value.value))
+      );
+    }
+    console.info("Will report payload to endpoint");
+
+    try {
+      await Configuration.postAnswers(
+        payload,
+        this.state.data.reporting.endpoint,
+        {
+          sessionKey: this.state.sessionKey,
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   render(props: any, state: QuestionnaireAppState) {
     console.info(state);
     if (!state.data) {
+      // No data -> no sesion loaded
       return html`<${QuestionnaireSessionlessPage} />`;
     }
 
     if (!state.started) {
+      // Not started -> Opening page
       return html`<${QuestionnaireOpeningPage} onSubmit=${this.start} />`;
     }
 
     if (state.answers?.length == state.data.subjects?.length) {
-      const body = this.answersBody();
+      // As much answers as subjects -> Final page
+      this.postAnswers().then(() =>
+        this.setState({ answersSentViaEndpoint: true })
+      );
+      this.popup?.close();
+      const body = this.emailBody();
       return html`<${QuestionnaireFinalPage}
+        answersSentViaEndpoint=${state.answersSentViaEndpoint}
         closingText=${state.data.closingText}
         reportEmail=${state.data.reporting.email ?? state.data.reporting}
         reportBody=${body}
       />`;
     }
 
-    // Render the current subject
+    // Else: render the current subject
     return html`<${QuestionnairePage}
       onClick=${this.start}
       onSubmit=${this.chooseOption}

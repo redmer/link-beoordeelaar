@@ -120,18 +120,19 @@ export class QuestionnairePage extends Component<
       <${PageHeader}
         title="${label("APP_TITLE")}"
         desc="${label("INTRODUCTION")}"
+        subject=${props.subject}
         index=${props.index}
         max=${props.max}
         onClick=${props.onClick}
       />
+      <footer>
+        <${PropertiesTable} subject=${props.subject} />
+      </footer>
       <main class="options-container">
         <form onSubmit=${props.onSubmit}>
           <${AnswerOption} options=${props.answerOptions} />
         </form>
       </main>
-      <footer>
-        <${PropertiesTable} subject=${props.subject} />
-      </footer>
     </div> `;
   }
 }
@@ -140,6 +141,7 @@ declare class QuestionnaireFinalPageProps {
   closingText?: string;
   reportEmail: string;
   reportBody: string;
+  answersSentViaEndpoint?: boolean;
 }
 
 export class QuestionnaireFinalPage extends Component<
@@ -147,9 +149,10 @@ export class QuestionnaireFinalPage extends Component<
   null
 > {
   render(props: QuestionnaireFinalPageProps) {
+    const suffix = props.answersSentViaEndpoint ? " ✔" : "";
     return html`<div class="page">
       <${PageHeader}
-        title="${label("FINAL_TITLE")}"
+        title="${label("FINAL_TITLE") + suffix}"
         desc="${props.closingText ?? label("CLOSING_REMARKS_MAIL")}"
       />
       <main class="measure">
@@ -210,20 +213,21 @@ const PageHeader = (props: {
   desc: string;
   index?: number;
   max?: number;
+  subject?: Subject;
   onClick?: CallableFunction;
 }) => {
-  console.info(props);
   return html`<header class="measure">
-    <h1>${props.title}</h1>
-    <${Progress} index="${props.index}" max="${props.max}" />
-    <p>
-      ${props.desc}
-      ${props.onClick
-        ? html`<button onClick=${props.onClick}>
+    <h1>
+      ${props.title} ${props?.max ? html`(${props?.index}/${props?.max})` : ""}
+    </h1>
+    <h4>
+      <code>${props?.subject?.url}</code> ${props.onClick
+        ? html`<button class="reopen-popup" onClick=${props.onClick}>
             ${label("REOPEN_POPUP")}
           </button>`
         : ""}
-    </p>
+    </h4>
+    <p>${props.desc}</p>
   </header>`;
 };
 
@@ -233,7 +237,7 @@ const Progress = (props: { index: number; max: number }) => {
 
   return html`
     <h4>
-      <progress id="voortgang" value="${props.index}" max="${props.max}">
+      <progress id="voortgang" value="${props.index}" max="${props.max + 1}">
         ${percentage.toFixed(0)}%
       </progress>
       <label for="voortgang">${props.index} / ${props.max}</label>
