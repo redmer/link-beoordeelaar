@@ -1,6 +1,6 @@
 {
   "$schema": "./configuration.schema.json",
-  "subjects": [{ "url": "https://crow.nl/" }, { "url": "https://rdmr.eu/" }],
+  "subjects": [{ "url": "https://en.wikipedia.org/" }, { "url": "https://example.org/" }, { "url": "https://rdmr.eu/" }],
   "reporting": { "email": "info@example.org" },
-  "allowedJudgements": [{ "name": "May stay" }, { "name": "May be archived" }]
+  "answerOptions": [{ "name": "May stay" }, { "name": "May be archived" }]
 }
