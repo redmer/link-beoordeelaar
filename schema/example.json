@@ -1,6 +1,10 @@
 {
   "$schema": "./configuration.schema.json",
-  "subjects": [{ "url": "https://en.wikipedia.org/" }, { "url": "https://example.org/" }, { "url": "https://rdmr.eu/" }],
+  "subjects": [
+    { "url": "https://en.wikipedia.org/wiki/Las_Meninas" }, 
+    { "url": "https://en.wikipedia.org/wiki/Portrait_of_a_Young_Girl_(Christus)" }, 
+    { "url": "https://en.wikipedia.org/wiki/After_the_Deluge_(painting)" }
+  ],
   "reporting": { "email": "info@example.org" },
-  "answerOptions": [{ "name": "May stay" }, { "name": "May be archived" }]
+  "answerOptions": [{ "name": "Like 🤍" }, { "name": "Meh 😴" }]
 }
