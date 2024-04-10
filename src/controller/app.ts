@@ -1,16 +1,16 @@
 /// <reference path="../types/configuration.d.ts" />
 import { html } from "htm/preact";
 import { Component } from "preact";
+import { Configuration } from "../model/config";
+import delay from "../util/delay";
+import { digest } from "../util/digest";
+import { UI_TRANSLATIONS } from "../util/lang";
 import {
   QuestionnaireFinalPage,
   QuestionnaireOpeningPage,
   QuestionnairePage,
   QuestionnaireSessionlessPage,
 } from "../view/page";
-import delay from "../util/delay";
-import { Configuration } from "../model/config";
-import { UI_TRANSLATIONS } from "../util/lang";
-import { digest } from "../util/digest";
 
 declare class QuestionnaireAppState {
   sessionKey: string;
@@ -126,6 +126,9 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
   };
 
   postAnswers = async () => {
+    if (this.state.answersSentViaEndpoint) return;
+    if (this.state.data.reporting?.endpoint?.path == undefined) return;
+
     let subjects = this.state.data.subjects;
     let answers = this.state.answers;
 
@@ -157,9 +160,9 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
   };
 
   render(props: any, state: QuestionnaireAppState) {
-    console.info(state);
+    // console.info(state);
     if (!state.data) {
-      // No data -> no sesion loaded
+      // No data -> no session loaded
       return html`<${QuestionnaireSessionlessPage} />`;
     }
 
@@ -170,8 +173,9 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
 
     if (state.answers?.length == state.data.subjects?.length) {
       // As much answers as subjects -> Final page
-      this.postAnswers().then(() =>
-        this.setState({ answersSentViaEndpoint: true })
+      this.postAnswers().then(
+        () => this.setState({ answersSentViaEndpoint: true }),
+        () => this.setState({ answersSentViaEndpoint: false })
       );
       this.popup?.close();
       const body = this.emailBody();
