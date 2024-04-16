@@ -117,14 +117,9 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
     let answers = this.state.answers;
 
     const payload = Configuration.answersPayload(subjects, answers);
-    return (
-      "Results\n" +
-      `Session key: ${this.state.sessionKey}\n` +
-      "\n\n" +
-      Object.entries(payload)
-        .map(([s, a]) => `${this.state.sessionKey}\t"${s}"\t"${a}"`)
-        .join("\n")
-    );
+    return Object.entries(payload)
+      .map(([s, a]) => `${this.state.sessionKey}\t"${s}"\t"${a}"`)
+      .join("\n");
   };
 
   postAnswers = async () => {
