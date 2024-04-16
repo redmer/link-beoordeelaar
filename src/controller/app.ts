@@ -119,11 +119,10 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
     const payload = Configuration.answersPayload(subjects, answers);
     return (
       "Results\n" +
-      "Session key:" +
-      this.state.sessionKey +
+      `Session key: ${this.state.sessionKey}\n` +
       "\n\n" +
       Object.entries(payload)
-        .map(([s, a]) => `"${btoa(s)}"\t"${a}"`)
+        .map(([s, a]) => `${this.state.sessionKey}\t"${s}"\t"${a}"`)
         .join("\n")
     );
   };
