@@ -1,9 +1,0 @@
-### List sessions
-GET /datasets
-
-#### Create a new dataset
-
-POST /sessions
-
-#### 
-GET 
