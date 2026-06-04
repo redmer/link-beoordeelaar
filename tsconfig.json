@@ -11,11 +11,15 @@
       "ES2020",
       "ES2021"
     ],
+    "importHelpers": true,
     "target": "ES2021",
     "checkJs": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsxImportSource": "preact",
+    "types": ["jest"],
+    "esModuleInterop": true,
+    "module": "nodenext"
   },
   "exclude": ["node_modules", "build", "rollup.config.js"]
 }
