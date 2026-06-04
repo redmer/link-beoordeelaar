@@ -1,4 +1,4 @@
-import label from "../util/lang";
+import label from "../util/lang.js";
 
 type SessionKey = string;
 type FetchOptions = { cache: boolean };
@@ -14,7 +14,7 @@ export class Configuration {
 
   static async fetchQuestionnaire(
     sessionKey: SessionKey,
-    options?: FetchOptions
+    options?: FetchOptions,
   ): Promise<QuestionnaireData> {
     const { cache } = { cache: false, ...options };
 
@@ -46,31 +46,30 @@ export class Configuration {
 
   static answersPayload(
     subjects: Subject[],
-    answers: Answer[]
+    answers: Answer[],
   ): Record<string, string> {
-    const zipped = subjects.map((s, i) => [s, answers[i]]);
-
-    return zipped.reduce(
-      (body: Record<string, string>, [subject, answer]: [Subject, Answer]) => {
-        return { ...body, [subject.url]: answer.value };
+    return subjects.reduce(
+      (body, s, i) => {
+        body[s.url] = answers[i].value;
+        return body;
       },
-      {}
+      {} as Record<string, any>,
     );
   }
 
   static async postAnswers(
     payload: Record<string, string>,
     endpoint: QuestionnaireData["reporting"]["endpoint"],
-    { sessionKey }: { sessionKey: string }
+    { sessionKey }: { sessionKey: string },
   ) {
     let authHeaders;
-    if (endpoint.authorizationType == "bearer")
+    if (endpoint!.authorizationType == "bearer")
       authHeaders = {
-        Authorization: `Bearer ${atob(endpoint.authorizationToken)}`,
+        Authorization: `Bearer ${atob(endpoint!.authorizationToken)}`,
       };
 
-    await fetch(endpoint.path, {
-      method: endpoint.method,
+    await fetch(endpoint!.path, {
+      method: endpoint!.method,
       redirect: "follow",
       headers: { ...authHeaders },
       body: JSON.stringify({
