@@ -1,4 +1,4 @@
-declare class QuestionnaireData {
+interface QuestionnaireData {
   answerOptions: Answer[];
   lang: string;
   translations: Record<string, string>;
@@ -25,19 +25,19 @@ declare type DefaultConfiguration = Omit<
   "subjects" | "reporting"
 >;
 
-declare class InterfaceParameters {
+interface InterfaceParameters {
   language: string;
   helpLink: string;
   completeByDate: Date | null;
   possibleAnswers: Answer[];
 }
 
-declare class Subject {
+interface Subject {
   url: string;
   [key: string]: string | number | null;
 }
 
-declare class Answer {
+interface Answer {
   name: string;
   description?: string;
   value?: string;

@@ -1,3 +1,1 @@
-export class WizardController {
-  static;
-}
+export class WizardController {}

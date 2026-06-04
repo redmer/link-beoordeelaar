@@ -1,4 +1,4 @@
-export const UI_TRANSLATIONS = {
+export const UI_TRANSLATIONS: Record<string, Record<string, string>> = {
   /* Add languages here */
   en: {
     /* Add translations here */

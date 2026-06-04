@@ -1,16 +1,15 @@
 /// <reference path="../types/configuration.d.ts" />
-import { html } from "htm/preact";
 import { Component } from "preact";
-import { Configuration } from "../model/config";
-import delay from "../util/delay";
-import { digest } from "../util/digest";
-import { UI_TRANSLATIONS } from "../util/lang";
+import { Configuration } from "../model/config.js";
+import delay from "../util/delay.js";
+import { digest } from "../util/digest.js";
+import { UI_TRANSLATIONS } from "../util/lang.js";
 import {
   QuestionnaireFinalPage,
   QuestionnaireOpeningPage,
   QuestionnairePage,
   QuestionnaireSessionlessPage,
-} from "../view/page";
+} from "../view/page.js";
 
 declare class QuestionnaireAppState {
   sessionKey: string;
@@ -54,34 +53,36 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
     window.addEventListener("popstate", this.navBack);
   }
 
-  navBack = async (event) => {
+  navBack = async (event: Event) => {
     this.state.answers.pop();
     this.setState({ answers: this.state.answers });
     window.localStorage.setItem(
       this.state.sessionKey,
-      JSON.stringify(this.state.answers)
+      JSON.stringify(this.state.answers),
     );
   };
 
-  chooseOption = async (event) => {
+  chooseOption = async (event: SubmitEvent) => {
     event.preventDefault();
-    console.log(`Fire -chooseOption by ${event.submitter.value}`);
+    console.log(
+      `Fire -chooseOption by ${(event.submitter! as HTMLButtonElement).value}`,
+    );
     const newAnswersValue = [
       ...this.state.answers,
       {
-        name: event.submitter.value,
-        value: event.submitter.value,
+        name: (event.submitter as HTMLButtonElement).value,
+        value: (event.submitter as HTMLButtonElement).value,
       },
     ];
     this.setState({ answers: newAnswersValue });
     history.pushState({ answers: newAnswersValue }, "");
     window.localStorage.setItem(
       this.state.sessionKey,
-      JSON.stringify(newAnswersValue)
+      JSON.stringify(newAnswersValue),
     );
     // answers.length + 1 => state first updated at next rendering cycle
     try {
-      this.popup.location =
+      this.popup!.location =
         this.state.data.subjects[this.state.answers.length + 1].url;
     } catch {}
   };
@@ -91,7 +92,7 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
     console.log(`Keyboard pressed: ${event.key}`);
     /** @type {HTMLButtonElement | null} */
     const target: HTMLButtonElement | null = document.querySelector(
-      `button[data-key-equivalent="${event.key}"]`
+      `button[data-key-equivalent="${event.key}"]`,
     );
     if (!target) return;
     target.classList.add("option-active");
@@ -100,13 +101,13 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
     target.classList.remove("option-active");
   }
 
-  start = async (event) => {
+  start = async (event: SubmitEvent) => {
     event.preventDefault();
     this.popup = window.open(
       this.state.data.subjects[this.state.answers.length].url, // always at start
       this.POPUP_WINDOW,
-      "toolbar=no,menubar=no,left=1,top=1"
-    );
+      "toolbar=no,menubar=no,left=1,top=1",
+    )!;
     this.setState({ started: true });
   };
 
@@ -138,7 +139,7 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
       if (hasSent) return;
       window.localStorage.setItem(
         digestSubjectAnswerPair,
-        JSON.stringify(answers.map((value) => value.value))
+        JSON.stringify(answers.map((value) => value.value)),
       );
     }
     console.info("Will report payload to endpoint");
@@ -149,7 +150,7 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
         this.state.data.reporting.endpoint,
         {
           sessionKey: this.state.sessionKey,
-        }
+        },
       );
     } catch (error) {
       console.error(error);
@@ -160,38 +161,42 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
     // console.info(state);
     if (!state.data) {
       // No data -> no session loaded
-      return html`<${QuestionnaireSessionlessPage} />`;
+      return <QuestionnaireSessionlessPage />;
     }
 
     if (!state.started) {
       // Not started -> Opening page
-      return html`<${QuestionnaireOpeningPage} onSubmit=${this.start} />`;
+      return <QuestionnaireOpeningPage onSubmit={this.start} />;
     }
 
     if (state.answers?.length == state.data.subjects?.length) {
       // As much answers as subjects -> Final page
       this.postAnswers().then(
         () => this.setState({ answersSentViaEndpoint: true }),
-        () => this.setState({ answersSentViaEndpoint: false })
+        () => this.setState({ answersSentViaEndpoint: false }),
       );
       this.popup?.close();
       const body = this.emailBody();
-      return html`<${QuestionnaireFinalPage}
-        answersSentViaEndpoint=${state.answersSentViaEndpoint}
-        closingText=${state.data.closingText}
-        reportEmail=${state.data.reporting.email ?? state.data.reporting}
-        reportBody=${body}
-      />`;
+      return (
+        <QuestionnaireFinalPage
+          answersSentViaEndpoint={state.answersSentViaEndpoint}
+          closingText={state.data.closingText}
+          reportEmail={state.data.reporting.email}
+          reportBody={body}
+        />
+      );
     }
 
     // Else: render the current subject
-    return html`<${QuestionnairePage}
-      onClick=${this.start}
-      onSubmit=${this.chooseOption}
-      answerOptions=${state.data.answerOptions}
-      subject=${state.data.subjects[state.answers.length]}
-      index=${state.answers.length + 1}
-      max=${state.data.subjects.length}
-    />`;
+    return (
+      <QuestionnairePage
+        onClick={this.start}
+        onSubmit={this.chooseOption}
+        answerOptions={state.data.answerOptions}
+        subject={state.data.subjects[state.answers.length]}
+        index={state.answers.length + 1}
+        max={state.data.subjects.length}
+      />
+    );
   }
 }
