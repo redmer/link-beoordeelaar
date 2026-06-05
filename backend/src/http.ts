@@ -15,7 +15,7 @@ export async function readJsonBody<T>(request: HttpRequest): Promise<T> {
 
 export function parseFilterParam(
   filterRaw: string | null,
-): Record<string, string | number | boolean | null> | null {
+): Record<string, unknown> | null {
   if (!filterRaw) {
     return null;
   }
@@ -27,7 +27,7 @@ export function parseFilterParam(
       return null;
     }
 
-    return parsed as Record<string, string | number | boolean | null>;
+    return parsed as Record<string, unknown>;
   } catch {
     return null;
   }

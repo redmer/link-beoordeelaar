@@ -1,12 +1,23 @@
 export type Answers = Record<string, string[]>;
 
+export type FilterValue = string | number | boolean | null;
+
+export type FilterExpression =
+  | { and: FilterExpression[] }
+  | { or: FilterExpression[] }
+  | { not: FilterExpression }
+  | { all: FilterExpression[] }
+  | { any: FilterExpression[] }
+  | { eq: { field: string; value: FilterValue } }
+  | { contains: { field: string; value: FilterValue } }
+  | { notContains: { field: string; value: FilterValue } };
+
 export interface SubjectDoc {
   id: string;
   datasetId: string;
   url: string;
   metadata?: Record<string, string | number | null>;
   answers: Answers;
-  isJudged: boolean;
   type: "subject";
   createdAt: string;
   updatedAt: string;

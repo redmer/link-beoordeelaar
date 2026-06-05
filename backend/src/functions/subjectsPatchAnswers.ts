@@ -7,17 +7,7 @@ import {
 } from "@azure/functions";
 import { getSubjectsContainer } from "../cosmos";
 import { readJsonBody } from "../http";
-import { SubjectPatchReq } from "../types";
-
-function hasAnswers(answers: SubjectPatchReq["answers"]) {
-  if (!answers || typeof answers !== "object") {
-    return false;
-  }
-
-  return Object.values(answers).some((value) =>
-    Array.isArray(value) ? value.length > 0 : false,
-  );
-}
+import { SubjectDoc, SubjectPatchReq } from "../types";
 
 export async function subjectsPatchAnswers(
   request: HttpRequest,
@@ -51,10 +41,20 @@ export async function subjectsPatchAnswers(
   }
 
   try {
-    const isJudged = hasAnswers(payload.answers);
+    const { resource } = await container
+      .item(subjectId, datasetId)
+      .read<SubjectDoc>();
+    if (!resource) {
+      return { status: 404 };
+    }
+
+    const mergedAnswers = {
+      ...(resource.answers ?? {}),
+      ...payload.answers,
+    };
+
     await container.item(subjectId, datasetId).patch([
-      { op: "set", path: "/answers", value: payload.answers },
-      { op: "set", path: "/isJudged", value: isJudged },
+      { op: "set", path: "/answers", value: mergedAnswers },
       { op: "set", path: "/updatedAt", value: new Date().toISOString() },
     ]);
   } catch (error) {
