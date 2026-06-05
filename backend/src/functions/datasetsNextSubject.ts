@@ -1,3 +1,4 @@
+import type { Container, JSONValue } from "@azure/cosmos";
 import { SqlQuerySpec } from "@azure/cosmos";
 import {
   app,
@@ -12,7 +13,7 @@ const SAFE_KEY = /^[A-Za-z0-9_]+$/;
 
 function buildFilter(filter: Record<string, string | number | boolean | null>) {
   const clauses: string[] = [];
-  const parameters: { name: string; value: unknown }[] = [];
+  const parameters: { name: string; value: JSONValue }[] = [];
 
   Object.entries(filter).forEach(([key, value], index) => {
     if (!SAFE_KEY.test(key)) {
@@ -49,7 +50,7 @@ export async function datasetsNextSubject(
 
   const filter = parseFilterParam(request.query.get("filter"));
   const baseClauses = ["c.datasetId = @datasetId", "c.type = 'subject'"];
-  const parameters: { name: string; value: unknown }[] = [
+  const parameters: { name: string; value: JSONValue }[] = [
     { name: "@datasetId", value: datasetId },
   ];
 
@@ -65,7 +66,7 @@ export async function datasetsNextSubject(
     parameters,
   };
 
-  let container;
+  let container: Container;
   try {
     container = await getSubjectsContainer();
   } catch (error) {

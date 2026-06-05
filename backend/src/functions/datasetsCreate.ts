@@ -1,3 +1,4 @@
+import type { Container } from "@azure/cosmos";
 import {
   app,
   HttpRequest,
@@ -51,7 +52,7 @@ export async function datasetsCreate(
   const datasetId = crypto.randomUUID();
   const now = new Date().toISOString();
 
-  let container;
+  let container: Container;
   try {
     container = await getSubjectsContainer();
   } catch (error) {

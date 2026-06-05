@@ -1,0 +1,33 @@
+@dataset = 523d66f2-cc37-4385-9b4d-cd954e6b456d
+@host = localhost:7071
+
+#### Create a dataset
+
+POST http://{{host}}/api/datasets/create
+Content-Type: application/json
+
+{
+    "subjects": [
+        {
+            "url": "http://example.com",
+            "metadata": {
+                "Publisher": "W3C",
+                "Public": true
+            }
+        },
+        {
+            "url": "https://rdmr.eu",
+            "metadata": {
+                "Publisher": ["Redmer", "Rdmr"]
+            }
+        }
+    ]
+}
+
+#### Query for next Subject
+
+GET http://{{host}}/api/datasets/{{dataset}}/next-subject
+
+#### Query for next Subject, filtered
+
+GET http://{{host}}/api/datasets/{{dataset}}/next-subject?filter=%7B%22Publisher%22%3A%22W3C%22%7D
