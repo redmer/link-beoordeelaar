@@ -1,3 +1,4 @@
+import type { Container } from "@azure/cosmos";
 import {
   app,
   HttpRequest,
@@ -41,7 +42,7 @@ export async function subjectsPatchAnswers(
     return { status: 400, body: "answers must be an object" };
   }
 
-  let container;
+  let container: Container;
   try {
     container = await getSubjectsContainer();
   } catch (error) {
