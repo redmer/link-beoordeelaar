@@ -66,7 +66,6 @@ export async function datasetsCreate(
     url: subject.url.trim(),
     metadata: subject.metadata,
     answers: {},
-    isJudged: false,
     type: "subject",
     createdAt: now,
     updatedAt: now,
