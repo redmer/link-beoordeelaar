@@ -30,4 +30,4 @@ GET http://{{host}}/api/datasets/{{dataset}}/next-subject
 
 #### Query for next Subject, filtered
 
-GET http://{{host}}/api/datasets/{{dataset}}/next-subject?filter=%7B%22Publisher%22%3A%22W3C%22%7D
+GET http://{{host}}/api/datasets/{{dataset}}/next-subject?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D

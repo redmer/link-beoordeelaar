@@ -69,7 +69,7 @@ function parseFilterExpression(value: unknown): FilterExpression | null {
   const key = keys[0];
   const content = value[key];
 
-  if (key === "and" || key === "or" || key === "all" || key === "any") {
+  if (key === "and" || key === "or") {
     if (!Array.isArray(content)) {
       return null;
     }
@@ -87,7 +87,7 @@ function parseFilterExpression(value: unknown): FilterExpression | null {
     return inner ? { not: inner } : null;
   }
 
-  if (key === "eq" || key === "contains" || key === "notContains") {
+  if (key === "eq" || key === "contains") {
     if (!isRecord(content)) {
       return null;
     }
@@ -99,6 +99,17 @@ function parseFilterExpression(value: unknown): FilterExpression | null {
     return { [key]: { field, value: valueNode } } as FilterExpression;
   }
 
+  if (key === "exists") {
+    if (!isRecord(content)) {
+      return null;
+    }
+    const field = content.field;
+    if (typeof field !== "string") {
+      return null;
+    }
+    return { exists: { field } };
+  }
+
   return null;
 }
 
@@ -106,8 +117,8 @@ function buildExpression(
   expr: FilterExpression,
   state: BuildState,
 ): string | null {
-  if ("and" in expr || "all" in expr) {
-    const items = "and" in expr ? expr.and : expr.all;
+  if ("and" in expr) {
+    const items = expr.and;
     const clauses = items
       .map((item) => buildExpression(item, state))
       .filter((item): item is string => item !== null);
@@ -117,8 +128,8 @@ function buildExpression(
     return `(${clauses.join(" AND ")})`;
   }
 
-  if ("or" in expr || "any" in expr) {
-    const items = "or" in expr ? expr.or : expr.any;
+  if ("or" in expr) {
+    const items = expr.or;
     const clauses = items
       .map((item) => buildExpression(item, state))
       .filter((item): item is string => item !== null);
@@ -130,7 +141,7 @@ function buildExpression(
 
   if ("not" in expr) {
     const inner = buildExpression(expr.not, state);
-    return inner ? `NOT ${inner}` : null;
+    return inner ? `NOT (${inner})` : null;
   }
 
   if ("eq" in expr) {
@@ -142,22 +153,21 @@ function buildExpression(
     return `${fieldPath} = ${paramName}`;
   }
 
+  if ("exists" in expr) {
+    const fieldPath = resolveFieldPath(expr.exists.field);
+    if (!fieldPath) {
+      return null;
+    }
+    return `IS_DEFINED(${fieldPath})`;
+  }
+
   if ("contains" in expr) {
     const fieldPath = resolveFieldPath(expr.contains.field);
     if (!fieldPath) {
       return null;
     }
     const paramName = addParam(state, expr.contains.value);
-    return `ARRAY_CONTAINS(${fieldPath}, ${paramName})`;
-  }
-
-  if ("notContains" in expr) {
-    const fieldPath = resolveFieldPath(expr.notContains.field);
-    if (!fieldPath) {
-      return null;
-    }
-    const paramName = addParam(state, expr.notContains.value);
-    return `NOT ARRAY_CONTAINS(${fieldPath}, ${paramName})`;
+    return `IS_DEFINED(${fieldPath}) AND ARRAY_CONTAINS(${fieldPath}, ${paramName})`;
   }
 
   return null;

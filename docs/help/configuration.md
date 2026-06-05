@@ -23,10 +23,10 @@ The filter supports basic boolean composition and matching against
 
 Supported operators:
 
-- `and` / `or` / `not` (aliases `all` / `any`)
+- `and` / `or` / `not`
 - `eq` (field equals value)
 - `contains` (array contains value)
-- `notContains` (array does not contain value)
+- `exists` (field is defined)
 
 #### Example
 
@@ -36,15 +36,20 @@ answers are already present."
 ```json
 {
   "and": [
-    { "notContains": { "field": "answers.q1", "value": "delete" } },
     {
       "not": {
-        "and": [
-          { "contains": { "field": "answers.q2", "value": "docTypeA" } },
-          { "contains": { "field": "answers.q3", "value": "catX" } }
-        ]
+        "contains": { "field": "answers.q1", "value": "delete" }
       }
-    }
+    },
+    {
+      "not":
+        { "exists": { "field": "answers.q2" } },
+    ,
+        "not":
+          { "exists": { "field": "answers.q3" } }
+
+      }
+
   ]
 }
 ```
@@ -52,7 +57,7 @@ answers are already present."
 URL-encoded (for `?filter=`):
 
 ```
-%7B%22and%22%3A%5B%7B%22notContains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%2C%7B%22not%22%3A%7B%22and%22%3A%5B%7B%22contains%22%3A%7B%22field%22%3A%22answers.q2%22%2C%22value%22%3A%22docTypeA%22%7D%7D%2C%7B%22contains%22%3A%7B%22field%22%3A%22answers.q3%22%2C%22value%22%3A%22catX%22%7D%7D%5D%7D%7D%5D%7D
+%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22and%22%3A%5B%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%2C%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%5D%7D%7D%5D%7D
 ```
 
 #### Allowed fields
@@ -60,6 +65,14 @@ URL-encoded (for `?filter=`):
 - `id`, `url`
 - `metadata.<key>`
 - `answers.<questionId>`
+
+#### Exists example
+
+"Give me subjects where any value for `q2` is already present."
+
+```json
+{ "exists": { "field": "answers.q2" } }
+```
 
 ## Generate Session Key
 
