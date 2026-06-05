@@ -13,14 +13,15 @@ export interface SlugifyOptions {
  */
 export default function slugify(
   name: any,
-  { allowUnicode }: SlugifyOptions = null,
+  { allowUnicode }: SlugifyOptions = { allowUnicode: false },
 ): string {
   let value = String(name);
   if (allowUnicode) value = value.normalize("NFKC");
   else value = value.normalize("NFKD").replace(/[^\x00-\x7F]/g, "");
+  const cleanupRegex = allowUnicode ? /[^\p{L}\p{N}\p{M}\s-]/gu : /[^\w\s-]/g;
   return value
     .toLowerCase()
-    .replace(/[^\w\s-]/g, "") // remove non-letter, non-whitespace, non -
+    .replace(cleanupRegex, "") // remove non-letter, non-whitespace, non -
     .replace(/[-\s]+/g, " ") // replace multiple - ⎵  with single ⎵
     .trim() // may not start or end with ⎵ (space)
     .replace(/\s/g, "-"); // replace ⎵  with -
