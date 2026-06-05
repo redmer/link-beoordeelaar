@@ -6,11 +6,9 @@ export type FilterExpression =
   | { and: FilterExpression[] }
   | { or: FilterExpression[] }
   | { not: FilterExpression }
-  | { all: FilterExpression[] }
-  | { any: FilterExpression[] }
+  | { exists: { field: string } }
   | { eq: { field: string; value: FilterValue } }
-  | { contains: { field: string; value: FilterValue } }
-  | { notContains: { field: string; value: FilterValue } };
+  | { contains: { field: string; value: FilterValue } };
 
 export interface SubjectDoc {
   id: string;
