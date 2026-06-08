@@ -36,10 +36,11 @@ export interface SubjectWithAnswers extends Subject {
 
 export interface SubjectNextResp {
   subject: SubjectWithAnswers;
-  stats: {
-    total: number;
-    unjudged: number;
-  };
+}
+
+export interface DatasetStatsResp {
+  total: number;
+  unjudged: number;
 }
 
 export type Answers = Record<string, string[]>; // key = question id, values = AnswerOption.values

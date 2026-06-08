@@ -1,6 +1,7 @@
 import type {
   Answers,
   ClientSession,
+  DatasetStatsResp,
   Subject,
   SubjectNextResp,
   SubjectPatchReq,
@@ -12,6 +13,14 @@ export async function fetchNextSubject(
   clientSession: ClientSession,
 ): Promise<SubjectNextResp> {
   const resp = await fetch(clientSession.links.next);
+  return await resp.json();
+}
+
+export async function fetchDatasetStats(
+  clientSession: ClientSession,
+): Promise<DatasetStatsResp> {
+  const datasetBase = clientSession.links.next.split("/next-subject", 1);
+  const resp = await fetch(`${datasetBase}/stats`);
   return await resp.json();
 }
 
