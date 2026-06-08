@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "preact/hooks";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ClientSessionContext } from "../hooks/ClientSessionContext.js";
 import {
   fetchDatasetStats,
@@ -15,6 +9,7 @@ import {
 import type { Answers, SubjectWithAnswers } from "../types.js";
 import delay from "../util/delay.js";
 import {
+  QuestionnaireNoSubjectRemaining,
   QuestionnaireOpeningPage,
   QuestionnairePage,
   QuestionnaireSessionlessPage,
@@ -49,8 +44,8 @@ export function App() {
 
     fetchNextSubject(clientSession)
       .then((resp) => {
-        setCurrentSubject(resp.subject);
-        setCurrentAnswers(resp.subject.answers ?? {});
+        setCurrentSubject(resp.subject ?? null);
+        setCurrentAnswers(resp.subject?.answers ?? {});
       })
       .catch((err) => console.error("Failed to fetch first subject:", err));
 
@@ -96,7 +91,7 @@ export function App() {
     };
   }, [findMnemonic]);
 
-  const start = useCallback(
+  const onStart = useCallback(
     (event: Event) => {
       event.preventDefault();
       if (!currentSubject) return;
@@ -110,56 +105,37 @@ export function App() {
     [currentSubject],
   );
 
-  const chooseOption = useCallback(
+  const onSubmit = useCallback(
     (event: SubmitEvent) => {
+      console.log(`Will submit for subject...`);
       event.preventDefault();
       if (!currentSubject) return;
 
       const submitter = event.submitter as HTMLButtonElement | null;
       if (!submitter) return;
 
-      // The form element carries the question id (see page.tsx).
-      const questionId = (event.target as HTMLFormElement).id;
-      if (!questionId) return;
+      // The form contains all answers
+      const form = (event.target as HTMLFormElement) || null;
+      if (!form) return;
 
-      const question = clientSession.questions.find((q) => q.id === questionId);
-      if (!question) return;
-
-      const answerOption = question.options.find(
-        (o) => o.value === submitter.value,
-      );
-
-      // For "multiple" mode, accumulate values; for "one", replace.
-      const nextAnswers: Answers = {
-        ...currentAnswers,
-        [questionId]:
-          question.mode === "multiple"
-            ? [...(currentAnswers[questionId] ?? []), submitter.value]
-            : [submitter.value],
-      };
-      setCurrentAnswers(nextAnswers);
-
-      const isFinal = answerOption?.final === true;
-      const allAnswered = clientSession.questions.every(
-        (q) => (nextAnswers[q.id]?.length ?? 0) > 0,
-      );
-
-      if (!isFinal && !allAnswered) return;
+      const data = new FormData(form);
+      const answers: Answers = {};
+      for (const [k, v] of data.entries()) {
+        if (k in answers) answers[k].push(v.toString());
+        else answers[k] = [v.toString()];
+      }
 
       // Subject is fully answered: save in background and advance to next.
       const savePromise = saveAnswer({
-        answers: nextAnswers,
+        answers,
         subject: currentSubject,
         clientSession,
       }).catch(console.error);
 
-      history.pushState(
-        { subjectId: currentSubject.id, answers: nextAnswers },
-        "",
-      );
+      history.pushState({ subjectId: currentSubject.id, answers }, "");
       setSubjectHistory((prev) => [
         ...prev,
-        { subjectId: currentSubject.id, answers: nextAnswers },
+        { subjectId: currentSubject.id, answers },
       ]);
 
       fetchNextSubject(clientSession)
@@ -179,30 +155,33 @@ export function App() {
     [clientSession, currentAnswers, currentSubject, refreshStats],
   );
 
-  if (!clientSession.links.next) {
+  if (clientSession.links.next == "") {
     return <QuestionnaireSessionlessPage />;
   }
 
-  if (!started) {
+  if (stats.unjudged < 1)
+    return <QuestionnaireNoSubjectRemaining totalSubjects={stats.total} />;
+
+  if (!started && stats.unjudged >= 1) {
     return (
       <QuestionnaireOpeningPage
-        onSubmit={start}
+        onSubmit={onStart}
         subjectsTotal={stats.total}
         subjectsUnjudged={stats.unjudged}
       />
     );
   }
 
-  if (!currentSubject) return <></>;
-
-  return (
-    <QuestionnairePage
-      onClick={start}
-      onSubmit={chooseOption}
-      questions={clientSession.questions}
-      subject={currentSubject}
-      unjudgedSubjects={stats.unjudged}
-      totalSubjects={stats.total}
-    />
-  );
+  if (started && !!currentSubject)
+    return (
+      <QuestionnairePage
+        onClick={onStart}
+        onSubmit={onSubmit}
+        questions={clientSession.questions}
+        answers={currentAnswers}
+        subject={currentSubject}
+        unjudgedSubjects={stats.unjudged}
+        totalSubjects={stats.total}
+      />
+    );
 }

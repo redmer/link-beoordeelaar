@@ -11,12 +11,15 @@ export const UI_TRANSLATIONS: Record<string, Record<string, string>> = {
     INCORRECT: "Incorrect",
     APP_TITLE: "Categorize",
     FINAL_TITLE: "Ready to send in",
+    CHOOSE_ONE: "Choose one",
+    CHOOSE_MULTIPLE: "Choose multiple",
+    SUBMIT_TITLE: "Submit and next",
+    SUBMIT_DESC: `Save categorization and open next link. To skip, refresh page.`,
     START: "Start",
     START_DESC: "Commence categorizing links",
     REOPEN_POPUP: "Reopen popup window",
     INTRODUCTION: `Categorize the link that has opened in the popup window
-      by choosing one of the following options. If you need to pause, you may
-      resume categorizing within one week inside this very browser.`,
+      by choosing one of the following options per row. Any answer will be saved immediately.`,
     INTRODUCTION_SESSIONLESS: `Provide a session key that refers to the
       questionnaire you want filled out.`,
     INTRODUCTION_OPENING: `Categorize the links that open in a popup window, by
@@ -24,6 +27,8 @@ export const UI_TRANSLATIONS: Record<string, Record<string, string>> = {
     CLOSING_REMARKS_MAIL: `Thank you for participating. Copy and send your
       results displayed below to the e-mail address displayed below that. 
       Otherwise, your response may not be recorded.`,
+    NO_SUBJECTS_REMAINING_TITLE: `Session done`,
+    NO_SUBJECTS_REMAINING_DESC: `Thank you for participating. Your response has been recorded.`,
   },
   nl: {
     DIAGNOSTICS: "Diagnostica",
@@ -35,12 +40,16 @@ export const UI_TRANSLATIONS: Record<string, Record<string, string>> = {
     INCORRECT: "Incorrect",
     APP_TITLE: "Beoordeel",
     FINAL_TITLE: "Klaar om in te sturen",
+    SUBMIT_TITLE: "Bewaar en volgende",
+    SUBMIT_DESC: `Sla beoordeling op en open de volgende link om te beoordelen. 
+      Om over te slaan, ververs pagina.`,
+    CHOOSE_ONE: "Kies één",
+    CHOOSE_MULTIPLE: "Kies meerdere",
     START: "Start",
     START_DESC: "Begin met beoordelen van links",
     REOPEN_POPUP: "Heropen popupvenster",
     INTRODUCTION: `Beoordeel de link geopend in de popup door op een van de
-      opties te klikken. Als je het beoordelen moet onderbreken, kun je op deze
-      computer in deze browser binnen een week doorgaan. `,
+      opties te klikken. Elk antwoord wordt meteen bewaard.`,
     INTRODUCTION_SESSIONLESS: `Open deze pagina met een sessiesleutel die
       verwijst naar de lijst van links die moeten worden beoordeeld.`,
     INTRODUCTION_OPENING: `Beoordeel de links die openen in een popup door op een
@@ -48,6 +57,8 @@ export const UI_TRANSLATIONS: Record<string, Record<string, string>> = {
     CLOSING_REMARKS_MAIL: `Bedankt voor het meedoen. Kopieer de resultaten die 
       hieronder staan en stuur ze naar het e-mailadres dat daar onder
       staat. Anders worden je resultaten mogelijk niet meegenomen.`,
+    NO_SUBJECTS_REMAINING_TITLE: `Onderzoek klaar`,
+    NO_SUBJECTS_REMAINING_DESC: `Bedankt. Je beoordelingen zijn opgeslagen.`,
   },
 };
 

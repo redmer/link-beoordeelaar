@@ -5,7 +5,7 @@ export function PropertiesTable(props: {
   keys: string[];
 }) {
   return (
-    <dl class="subject-properties measure-wide">
+    <dl className="subject-properties measure-wide">
       {props.metadata &&
         Object.entries(props.metadata).map(([key, rawvalue]) => {
           // If there are allowed-keys, then skip if key is in them
@@ -19,7 +19,7 @@ export function PropertiesTable(props: {
           const value = String(rawvalue);
 
           return (
-            <div class="keep-together kv-pair">
+            <div className="keep-together kv-pair">
               <dt>{key}</dt>
               <dd>
                 <code>{value}</code>

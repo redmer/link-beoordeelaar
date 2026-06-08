@@ -12,7 +12,7 @@ export function Progress(props: {
       <progress id="voortgang" value={done} max={max}>
         {percentage.toFixed(0)}%
       </progress>
-      <label for="voortgang">
+      <label htmlFor="voortgang">
         {done}/{max}
       </label>
     </h4>

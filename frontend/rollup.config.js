@@ -1,13 +1,22 @@
+import commonjs from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
+import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
 
 export default {
   input: "./src/index.tsx",
   output: {
-    file: "./build/bundle.min.js",
-    format: "es",
-    name: "bundle",
-    generatedCode: "es2015",
+    file: "./dist/bundle.min.js",
+    format: "esm",
+    sourcemap: true,
   },
-  plugins: [typescript(), nodeResolve()],
+  plugins: [
+    replace({
+      "process.env.NODE_ENV": JSON.stringify("production"),
+      preventAssignment: true,
+    }),
+    typescript({ tsconfig: "./tsconfig.json" }),
+    nodeResolve({ browser: true, extensions: [".js", ".jsx", ".ts", ".tsx"] }),
+    commonjs(),
+  ],
 };

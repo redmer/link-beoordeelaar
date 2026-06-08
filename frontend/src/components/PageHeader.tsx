@@ -1,4 +1,4 @@
-import { useContext } from "preact/hooks";
+import { useContext } from "react";
 import { ClientSessionContext } from "../hooks/ClientSessionContext.js";
 import label from "../util/lang.js";
 
@@ -7,7 +7,7 @@ export function PageHeader(props: { help?: string }) {
   const help = props.help ?? clientSession.links.help ?? label("HELP_URL");
 
   return (
-    <header class="colophon">
+    <header className="colophon">
       <div>
         <a target="_blank" href={help}>
           {label("HELP_TITLE")}
