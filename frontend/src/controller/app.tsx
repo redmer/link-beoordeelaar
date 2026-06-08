@@ -1,4 +1,3 @@
-/// <reference path="../types/configuration.d.ts" />
 import { Component } from "preact";
 import { Configuration } from "../model/config.js";
 import delay from "../util/delay.js";
@@ -194,8 +193,8 @@ export class QuestionnaireApp extends Component<any, QuestionnaireAppState> {
         onSubmit={this.chooseOption}
         answerOptions={state.data.answerOptions}
         subject={state.data.subjects[state.answers.length]}
-        index={state.answers.length + 1}
-        max={state.data.subjects.length}
+        unjudgedSubjects={state.answers.length + 1}
+        totalSubjects={state.data.subjects.length}
       />
     );
   }

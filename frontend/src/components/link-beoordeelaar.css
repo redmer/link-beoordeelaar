@@ -57,14 +57,22 @@ footer.diagnostics {
   flex-shrink: 0;
 }
 
-footer.diagnostics {
-  margin-top: auto;
+header.colophon {
   justify-content: end;
+}
+
+footer.diagnostics:has(> details[open]) {
+  flex-direction: column;
 }
 
 footer.diagnostics #debug-diagnostics {
   font-family: "Consolas", Courier, monospace;
   word-break: break-all;
+  max-width: 100%;
+}
+
+.overflow-x-scroll {
+  overflow-x: scroll;
 }
 
 main.app {
@@ -88,6 +96,10 @@ main.app {
 
 .measure-wide {
   max-width: 52rem;
+}
+
+progress {
+  min-width: 100%;
 }
 
 /* Option buttons */
@@ -131,7 +143,8 @@ main.app {
   padding: 1em;
   transition: all 0.2s ease-out;
   border: 2px solid var(--card-border);
-  box-shadow: 0 10px 10px hsla(0, 100%, 0%, 15%),
+  box-shadow:
+    0 10px 10px hsla(0, 100%, 0%, 15%),
     inset 0 1px hsla(var(--anti-theme-hue), 75%, 62%, 75%);
 }
 
@@ -233,7 +246,8 @@ button.reopen-popup {
   margin-left: 0.5rem;
   transition: all 0.2s ease-out;
   border: 2px solid var(--card-border);
-  box-shadow: 0 10px 10px hsla(0, 100%, 0%, 15%),
+  box-shadow:
+    0 10px 10px hsla(0, 100%, 0%, 15%),
     inset 0 1px hsla(var(--anti-theme-hue), 75%, 62%, 75%);
 }
 
