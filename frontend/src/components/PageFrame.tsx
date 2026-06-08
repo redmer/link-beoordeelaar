@@ -1,4 +1,4 @@
-import { type PropsWithChildren } from "preact/compat";
+import { type PropsWithChildren } from "react";
 import {
   ClientSessionProvider,
   sessionKey,
@@ -12,7 +12,7 @@ export function PageFrame(props: PropsWithChildren) {
     <div id="link-beoordelaar">
       <ClientSessionProvider sessionKey={sessionKey() ?? undefined}>
         <PageHeader />
-        <main class="app">
+        <main className="app">
           <ErrorBoundary>{props.children}</ErrorBoundary>
         </main>
         <PageFooter />

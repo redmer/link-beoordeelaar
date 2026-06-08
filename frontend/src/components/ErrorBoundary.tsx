@@ -1,6 +1,6 @@
-import { Component } from "preact";
+import { Component, type PropsWithChildren } from "react";
 
-export class ErrorBoundary extends Component {
+export class ErrorBoundary extends Component<PropsWithChildren> {
   state = { error: null };
 
   static getDerivedStateFromError(error: Error) {
@@ -15,7 +15,7 @@ export class ErrorBoundary extends Component {
   render() {
     if (this.state.error) {
       return (
-        <div class="measure">
+        <div className="measure">
           <h1>Error 🩻</h1>
           <h2>{(this.state.error as Error).name}</h2>
           <p>{(this.state.error as Error).message}</p>

@@ -1,6 +1,5 @@
-import { createContext } from "preact";
-import type { PropsWithChildren } from "preact/compat";
-import { useEffect, useState } from "preact/hooks";
+import type { PropsWithChildren } from "react";
+import { createContext, useEffect, useState } from "react";
 import { fetchClientSession } from "../stores/Client.js";
 import type { ClientSession } from "../types.js";
 import label from "../util/lang.js";

@@ -1,34 +1,50 @@
-import type { Question as QuestionData } from "../types.js";
-import { AnswerOption } from "./AnswerOption.js";
+import type { Answers, Question as QuestionData } from "../types.js";
+import label from "../util/lang.js";
+import { AnswerGroup, AnswerSubmitButton } from "./AnswerOption.js";
 
 export interface Props {
   questions: QuestionData[];
+  answers: Answers;
   onSubmit: (...args: any[]) => void;
 }
 
-export function QuestionSteps(props: Props) {
+export function Questionnaire(props: Props) {
+  const mnemonic = (index: number) => {
+    return ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"][index];
+  };
   return (
-    <main class="options-container">
-      {props.questions.map((q) => (
-        <QuestionStep key={q.id} question={q} onSubmit={props.onSubmit} />
+    <form onSubmit={props.onSubmit} className="options-container">
+      {props.questions.map((q, n) => (
+        <QuestionStep key={q.id} question={q} answers={props.answers} />
       ))}
-    </main>
+      <fieldset>
+        <div className="option-list">
+          <AnswerSubmitButton />
+        </div>
+      </fieldset>
+    </form>
   );
 }
 
 export interface SingleProps {
   question: QuestionData;
-  onSubmit: (...args: any[]) => void;
+  answers: Answers;
 }
 
 export function QuestionStep(props: SingleProps) {
   const q = props.question;
   return (
-    <div>
-      <h4>{q.label}</h4>
-      <form id={q.id} onSubmit={props.onSubmit}>
-        <AnswerOption options={q.options} />
-      </form>
-    </div>
+    <fieldset>
+      <legend>
+        {q.label} (
+        {q.mode == "one" ? label("CHOOSE_ONE") : label("CHOOSE_MULTIPLE")})
+      </legend>
+      <AnswerGroup
+        options={q.options}
+        name={q.id}
+        mode={q.mode}
+        selectedAnswers={props.answers[q.id] ?? []}
+      />
+    </fieldset>
   );
 }

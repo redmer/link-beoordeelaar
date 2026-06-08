@@ -9,6 +9,8 @@
   --card-border: hsl(var(--theme-hue), 62%, 25%);
   --card-bg-hover: hsl(var(--theme-hue), 62%, 25%);
   --card-color: white;
+  --card-checked-bg-color: hsl(var(--theme-hue), 50%, 45%);
+  --card-checked-color: white;
   --card-active-bg-color: hsl(var(--theme-hue), 50%, 12%);
   --card-active-color: white;
 
@@ -153,14 +155,16 @@ progress {
   border: 2px solid var(--behind-bg-color);
 }
 
+.input-label input:checked + .option {
+  background-color: var(--card-checked-bg-color);
+  color: var(--card-checked-color);
+  border-color: var(--focus-bg-color);
+}
+
 .option:active,
 .option-active {
   background-color: var(--card-active-bg-color);
   color: var(--card-active-color);
-}
-
-.option input[type="radio"] {
-  display: none;
 }
 
 /* Properties table */

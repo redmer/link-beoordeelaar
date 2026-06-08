@@ -20,7 +20,4 @@ export default {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.jsx?$": "$1",
   },
-  transformIgnorePatterns: [
-    "/node_modules/(?!(preact|@preact|@testing-library)/)",
-  ],
 };

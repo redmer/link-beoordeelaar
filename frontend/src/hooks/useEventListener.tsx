@@ -1,22 +1,32 @@
-import React, { type ReactElement } from "preact/compat";
+import React from "react";
 
-export function useEventListener(
-  target: ReactElement,
-  eventName,
-  handler,
-  options,
-) {
+type DOMTarget = Window | Document | HTMLElement;
+type MaybeRef<T> = T | React.RefObject<T | null>;
+
+export function useEventListener<E extends Event = Event>(
+  target: MaybeRef<DOMTarget | null>,
+  eventName: string,
+  handler: (event: E) => void,
+  options?: boolean | AddEventListenerOptions,
+): void {
   const onEvent = React.useEffectEvent(handler);
 
   React.useEffect(() => {
-    const targetElement = target.current ?? target;
+    const targetElement =
+      "current" in (target as object)
+        ? (target as React.RefObject<DOMTarget>).current
+        : (target as DOMTarget);
 
-    if (!targetElement?.addEventListener) return;
+    if (!targetElement) return;
 
-    targetElement.addEventListener(eventName, onEvent, options);
+    const listener = (event: Event) => {
+      onEvent(event as E);
+    };
+
+    targetElement.addEventListener(eventName, listener, options);
 
     return () => {
-      targetElement.removeEventListener(eventName, onEvent, options);
+      targetElement.removeEventListener(eventName, listener, options);
     };
   }, [target, eventName, options]);
 }
