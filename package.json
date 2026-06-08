@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "react-hotkeys-hook": "^5.3.2"
   }
 }

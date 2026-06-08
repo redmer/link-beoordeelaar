@@ -3,8 +3,10 @@ export const UI_TRANSLATIONS: Record<string, Record<string, string>> = {
   en: {
     /* Add translations here */
     DIAGNOSTICS: "Diagnostics",
+    HELP_TITLE: "Help and Support",
     HELP_URL: "https://rdmr.eu/link-beoordeelaar/docs/help/enduser/en",
     LANGUAGE: "English",
+    DIAGNOSTICS_TITLE: "Internals",
     CORRECT: "Correct",
     INCORRECT: "Incorrect",
     APP_TITLE: "Categorize",
@@ -25,7 +27,9 @@ export const UI_TRANSLATIONS: Record<string, Record<string, string>> = {
   },
   nl: {
     DIAGNOSTICS: "Diagnostica",
+    HELP_TITLE: "Ondersteuning",
     HELP_URL: "https://rdmr.eu/link-beoordeelaar/docs/help/enduser/nl",
+    DIAGNOSTICS_TITLE: "Onder de motorkap",
     LANGUAGE: "Nederlands",
     CORRECT: "Correct",
     INCORRECT: "Incorrect",
