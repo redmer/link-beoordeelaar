@@ -167,8 +167,39 @@ progress {
   color: var(--card-active-color);
 }
 
-/* Properties table */
+/* Keyboard focus */
+fieldset:focus,
+fieldset:focus-within {
+  background-color: var(--focus-bg-color);
+}
 
+fieldset {
+  border-radius: 0.5rem;
+}
+
+.mnemonic {
+  padding: 0.5rem 0.5rem;
+  background-color: var(--focus-bg-color);
+  color: var(--focus-color);
+  border-bottom-left-radius: 0.5rem;
+  font-size: large;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+legend .mnemonic {
+  border-radius: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.option .mnemonic {
+  display: block;
+  position: absolute;
+  top: 1px;
+  right: 1px;
+}
+
+/* Properties table */
 .keep-together {
   break-inside: avoid-column;
 }
@@ -212,26 +243,6 @@ dl.subject-properties dd {
 
 dl.subject-properties dt {
   font-weight: bold;
-}
-
-.mnemonic {
-  display: block;
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  padding: 0.5rem 0.5rem;
-  background-color: var(--focus-bg-color);
-  color: var(--focus-color);
-  border-bottom-left-radius: 0.5rem;
-  font-size: large;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.mailto-cta {
-  margin: 3rem auto;
-  font-size: xx-large;
-  text-align: center;
 }
 
 button.reopen-popup {
