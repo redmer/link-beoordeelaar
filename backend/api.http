@@ -1,5 +1,6 @@
-@dataset = 523d66f2-cc37-4385-9b4d-cd954e6b456d
 @host = localhost:7071
+@dataset = 523d66f2-cc37-4385-9b4d-cd954e6b456d
+@subject = 60059341-1517-4eae-af77-7b92ae51551c
 
 #### Create a dataset
 
@@ -31,3 +32,11 @@ GET http://{{host}}/api/datasets/{{dataset}}/next-subject
 #### Query for next Subject, filtered
 
 GET http://{{host}}/api/datasets/{{dataset}}/next-subject?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D
+
+#### Fetch a dataset's statistics
+
+GET http://{{host}}/api/datasets/{{dataset}}/stats?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D
+
+#### Fetch a single subject
+
+GET http://{{host}}/api/datasets/{{dataset}}/subjects/{{subject}}

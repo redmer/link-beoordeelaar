@@ -6,7 +6,12 @@ import {
   useState,
 } from "preact/hooks";
 import { ClientSessionContext } from "../hooks/ClientSessionContext.js";
-import { fetchNextSubject, fetchSubject, saveAnswer } from "../stores/Server.js";
+import {
+  fetchDatasetStats,
+  fetchNextSubject,
+  fetchSubject,
+  saveAnswer,
+} from "../stores/Server.js";
 import type { Answers, SubjectWithAnswers } from "../types.js";
 import delay from "../util/delay.js";
 import {
@@ -26,12 +31,17 @@ export function App() {
   const popupRef = useRef<Window | null>(null);
   const clientSession = useContext(ClientSessionContext);
 
-  const [stats, setStats] = useState({ total: Infinity, unjudged: Infinity });
+  const [stats, setStats] = useState({ total: 0, unjudged: 0 });
   const [subjectHistory, setSubjectHistory] = useState<HistoryEntry[]>([]);
   const [currentSubject, setCurrentSubject] =
     useState<SubjectWithAnswers | null>(null);
   const [currentAnswers, setCurrentAnswers] = useState<Answers>({});
   const [started, setStarted] = useState(false);
+
+  const refreshStats = useCallback(async () => {
+    const stats = await fetchDatasetStats(clientSession);
+    setStats({ total: stats.total, unjudged: stats.unjudged });
+  }, [clientSession]);
 
   // Fetch the first subject when a real session is available.
   useEffect(() => {
@@ -39,12 +49,13 @@ export function App() {
 
     fetchNextSubject(clientSession)
       .then((resp) => {
-        setStats({ total: resp.stats.total, unjudged: resp.stats.unjudged });
         setCurrentSubject(resp.subject);
         setCurrentAnswers(resp.subject.answers ?? {});
       })
       .catch((err) => console.error("Failed to fetch first subject:", err));
-  }, [clientSession.links.next]);
+
+    refreshStats().catch((err) => console.error("Failed to fetch stats:", err));
+  }, [clientSession.links.next, refreshStats]);
 
   const findMnemonic = useCallback(async (event: KeyboardEvent) => {
     event.preventDefault();
@@ -78,6 +89,7 @@ export function App() {
 
     document.addEventListener("keyup", findMnemonic);
     window.addEventListener("popstate", navBack);
+
     return () => {
       document.removeEventListener("keyup", findMnemonic);
       window.removeEventListener("popstate", navBack);
@@ -135,13 +147,16 @@ export function App() {
       if (!isFinal && !allAnswered) return;
 
       // Subject is fully answered: save in background and advance to next.
-      saveAnswer({
+      const savePromise = saveAnswer({
         answers: nextAnswers,
         subject: currentSubject,
         clientSession,
       }).catch(console.error);
 
-      history.pushState({ subjectId: currentSubject.id, answers: nextAnswers }, "");
+      history.pushState(
+        { subjectId: currentSubject.id, answers: nextAnswers },
+        "",
+      );
       setSubjectHistory((prev) => [
         ...prev,
         { subjectId: currentSubject.id, answers: nextAnswers },
@@ -149,7 +164,6 @@ export function App() {
 
       fetchNextSubject(clientSession)
         .then((resp) => {
-          setStats({ total: resp.stats.total, unjudged: resp.stats.unjudged });
           setCurrentSubject(resp.subject);
           setCurrentAnswers(resp.subject.answers ?? {});
           try {
@@ -157,8 +171,12 @@ export function App() {
           } catch {}
         })
         .catch(console.error);
+
+      savePromise.finally(() => {
+        refreshStats().catch(console.error);
+      });
     },
-    [clientSession, currentAnswers, currentSubject],
+    [clientSession, currentAnswers, currentSubject, refreshStats],
   );
 
   if (!clientSession.links.next) {

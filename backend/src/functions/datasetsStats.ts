@@ -10,7 +10,13 @@ import { getSubjectsContainer } from "../cosmos";
 import { buildFilter } from "../filter";
 import { parseFilterParam } from "../http";
 
-export async function datasetsNextSubject(
+async function countSubjects(container: Container, query: SqlQuerySpec) {
+  const iterator = container.items.query<number>(query);
+  const { resources } = await iterator.fetchNext();
+  return resources?.[0] ?? 0;
+}
+
+export async function datasetsStats(
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
@@ -26,6 +32,7 @@ export async function datasetsNextSubject(
   if (filterRaw && !filter) {
     return { status: 400, body: "Invalid filter JSON." };
   }
+
   const baseClauses = ["c.datasetId = @datasetId", "c.type = 'subject'"];
   const parameters: { name: string; value: JSONValue }[] = [
     { name: "@datasetId", value: datasetId },
@@ -41,12 +48,6 @@ export async function datasetsNextSubject(
     parameters.push(...extra.parameters);
   }
 
-  const filteredWhere = filteredClauses.join(" AND ");
-  const querySpec: SqlQuerySpec = {
-    query: `SELECT * FROM c WHERE ${filteredWhere}`,
-    parameters,
-  };
-
   let container: Container;
   try {
     container = await getSubjectsContainer();
@@ -55,28 +56,33 @@ export async function datasetsNextSubject(
     return { status: 500, body: "Cosmos DB configuration is missing." };
   }
 
-  const iterator = container.items.query(querySpec, { maxItemCount: 50 });
-  const { resources } = await iterator.fetchNext();
-  const candidates = resources ?? [];
+  const filteredWhere = filteredClauses.join(" AND ");
+  const totalQuery: SqlQuerySpec = {
+    query: `SELECT VALUE COUNT(1) FROM c WHERE ${baseClauses.join(" AND ")}`,
+    parameters,
+  };
+  const unjudgedQuery: SqlQuerySpec = {
+    query: `SELECT VALUE COUNT(1) FROM c WHERE ${filteredWhere}`,
+    parameters,
+  };
 
-  if (candidates.length === 0) {
-    return { status: 404 };
-  }
-
-  const randomIndex = Math.floor(Math.random() * candidates.length);
-  const subject = candidates[randomIndex];
+  const [total, unjudged] = await Promise.all([
+    countSubjects(container, totalQuery),
+    countSubjects(container, unjudgedQuery),
+  ]);
 
   return {
     status: 200,
     jsonBody: {
-      subject,
+      total,
+      unjudged,
     },
   };
 }
 
-app.http("datasetsNextSubject", {
+app.http("datasetsStats", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "datasets/{dataset}/next-subject",
-  handler: datasetsNextSubject,
+  route: "datasets/{dataset}/stats",
+  handler: datasetsStats,
 });
