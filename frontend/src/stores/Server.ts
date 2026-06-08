@@ -19,8 +19,9 @@ export async function fetchNextSubject(
 export async function fetchDatasetStats(
   clientSession: ClientSession,
 ): Promise<DatasetStatsResp> {
+  const url = new URL(clientSession.links.next);
   const datasetBase = clientSession.links.next.split("/next-subject", 1);
-  const resp = await fetch(`${datasetBase}/stats`);
+  const resp = await fetch(`${datasetBase}/stats${url.search}`);
   return await resp.json();
 }
 

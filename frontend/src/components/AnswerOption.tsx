@@ -1,5 +1,7 @@
+import { useKeyPress } from "../hooks/useKeyPress.js";
 import type { AnswerOption as AnswerOptionData, Question } from "../types.js";
 import label from "../util/lang.js";
+import { Mnemonic } from "./Mnemonic.js";
 
 export interface AnswerGroupProps {
   options: AnswerOptionData[];
@@ -10,24 +12,7 @@ export interface AnswerGroupProps {
 
 export function AnswerGroup(props: AnswerGroupProps) {
   const mnemonic = (index: number) => {
-    return [
-      "f",
-      "j",
-      "x",
-      "5",
-      "6",
-      "7",
-      "d",
-      "k",
-      "r",
-      "u",
-      "e",
-      "i",
-      "1",
-      "2",
-      "9",
-      "0",
-    ][index];
+    return ["f", "j", "d", "k", "s", "l", "a", ";", "u", "i", "o", "p"][index];
   };
 
   const answers = props.options;
@@ -42,7 +27,6 @@ export function AnswerGroup(props: AnswerGroupProps) {
             label={answer.label}
             description={answer.description ?? ""}
             mnemonic={mnemonic(n)}
-            isFinal={answer?.final ?? false}
             checked={props.selectedAnswers.includes(answer.value!)}
           />
         );
@@ -57,7 +41,6 @@ export interface AnswerOption {
   value: string;
   name?: string;
   mnemonic: string;
-  isFinal?: boolean;
   mode?: Question["mode"];
   checked?: boolean;
 }
@@ -77,13 +60,10 @@ export function AnswerOptionButton(props: AnswerOption) {
         id={`opt-${props.value}`}
         value={props.value}
         data-key-equivalent={props.mnemonic}
-        data-is-final={props.isFinal}
-        checked={props.checked}
+        defaultChecked={props.checked}
       ></input>
       <label className="option" htmlFor={`opt-${props.value}`}>
-        <span className="mnemonic">
-          <kbd title="press with keyboard">{props.mnemonic}</kbd>
-        </span>
+        <Mnemonic keyboard={props.mnemonic} />
         <h2 className="option-title">{props.label}</h2>
         <p className="option-description">{props.description}</p>
       </label>
@@ -91,12 +71,11 @@ export function AnswerOptionButton(props: AnswerOption) {
   );
 }
 
-export function AnswerSubmitButton() {
+export function AnswerSubmitButton(props: { onSubmit: () => void }) {
+  useKeyPress("Enter", props.onSubmit);
   return (
     <button type="submit" className="option">
-      <span className="mnemonic">
-        <kbd title="press with keyboard">⏎ ENTER</kbd>
-      </span>
+      <Mnemonic keyboard="Enter" />
       <h2 className="option-title">{label("SUBMIT_TITLE")}</h2>
       <p className="option-description">{label("SUBMIT_DESC")}</p>
     </button>

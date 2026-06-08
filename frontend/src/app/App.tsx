@@ -111,11 +111,8 @@ export function App() {
       event.preventDefault();
       if (!currentSubject) return;
 
-      const submitter = event.submitter as HTMLButtonElement | null;
-      if (!submitter) return;
-
       // The form contains all answers
-      const form = (event.target as HTMLFormElement) || null;
+      const form = document.querySelector("form");
       if (!form) return;
 
       const data = new FormData(form);

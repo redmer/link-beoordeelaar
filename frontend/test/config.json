@@ -7,29 +7,48 @@
       "options": [
         {
           "value": "keep",
-          "label": "Keep this"
+          "label": "Keep this ✅",
+          "description": "Migrate and categorize"
         },
         {
           "value": "delete",
-          "label": "Delete it",
-          "description": "Remove this from review",
-          "final": true
+          "label": "Delete it 👋",
+          "description": "Don't migrate"
         }
       ]
     },
     {
       "id": "q2",
-      "mode": "multiple",
+      "mode": "one",
       "label": "Document Type",
       "options": [
         { "value": "index", "label": "List or index page" },
         { "value": "content", "label": "Content page" },
         { "value": "flag", "label": "Flag for review" }
       ]
+    },
+    {
+      "id": "q3",
+      "mode": "multiple",
+      "label": "Theme",
+      "options": [
+        { "value": "policy", "label": "Policy" },
+        { "value": "infrastructure", "label": "Infrastructure" },
+        { "value": "social", "label": "Social" }
+      ]
     }
   ],
   "links": {
     "next": "http://localhost:7071/api/datasets/523d66f2-cc37-4385-9b4d-cd954e6b456d/next-subject?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D",
     "help": "mailto:noreply@example.com"
+  },
+  "raw": {
+    "next": {
+      "and": [
+        { "not": { "contains": { "field": "answers.q1", "value": "delete" } } },
+        { "not": { "exists": { "field": "answers.q2" } } },
+        { "not": { "exists": { "field": "answers.q3" } } }
+      ]
+    }
   }
 }
