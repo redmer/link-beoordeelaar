@@ -1,4 +1,3 @@
-import { useKeyPress } from "../hooks/useKeyPress.js";
 import type { AnswerOption as AnswerOptionData, Question } from "../types.js";
 import label from "../util/lang.js";
 import { Mnemonic } from "./Mnemonic.js";
@@ -71,8 +70,7 @@ export function AnswerOptionButton(props: AnswerOption) {
   );
 }
 
-export function AnswerSubmitButton(props: { onSubmit: () => void }) {
-  useKeyPress("Enter", props.onSubmit);
+export function AnswerSubmitButton() {
   return (
     <button type="submit" className="option">
       <Mnemonic keyboard="Enter" />

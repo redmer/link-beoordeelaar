@@ -7,7 +7,13 @@ describe("label (language/translations)", () => {
   });
 
   it("should return English label for known keys", () => {
-    const keys = ["DIAGNOSTICS", "LANGUAGE", "CORRECT", "INCORRECT", "START"];
+    const keys = [
+      "DIAGNOSTICS",
+      "LANGUAGE",
+      "CORRECT",
+      "INCORRECT",
+      "START",
+    ] as const;
     keys.forEach((key) => {
       expect(label(key)).toBeTruthy();
     });
@@ -42,7 +48,7 @@ describe("label (language/translations)", () => {
       "INTRODUCTION_SESSIONLESS",
       "INTRODUCTION_OPENING",
       "CLOSING_REMARKS_MAIL",
-    ];
+    ] as const;
 
     requiredKeys.forEach((key) => {
       expect(UI_TRANSLATIONS.en).toHaveProperty(key);
@@ -66,7 +72,7 @@ describe("label (language/translations)", () => {
       "INTRODUCTION_SESSIONLESS",
       "INTRODUCTION_OPENING",
       "CLOSING_REMARKS_MAIL",
-    ];
+    ] as const;
 
     requiredKeys.forEach((key) => {
       expect(UI_TRANSLATIONS.nl).toHaveProperty(key);

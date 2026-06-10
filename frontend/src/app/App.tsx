@@ -1,4 +1,11 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { Page } from "../components/Page.js";
+import {
+  QuestionnaireNoSubjectRemaining,
+  QuestionnaireOpeningPage,
+  QuestionnairePage,
+  QuestionnaireSessionlessPage,
+} from "../components/QuestionnairePage.js";
 import { ClientSessionContext } from "../hooks/ClientSessionContext.js";
 import {
   fetchDatasetStats,
@@ -7,13 +14,6 @@ import {
   saveAnswer,
 } from "../stores/Server.js";
 import type { Answers, SubjectWithAnswers } from "../types.js";
-import delay from "../util/delay.js";
-import {
-  QuestionnaireNoSubjectRemaining,
-  QuestionnaireOpeningPage,
-  QuestionnairePage,
-  QuestionnaireSessionlessPage,
-} from "../view/page.js";
 
 const POPUP_WINDOW = "link-beoordelaar-popup";
 
@@ -27,6 +27,9 @@ export function App() {
   const clientSession = useContext(ClientSessionContext);
 
   const [stats, setStats] = useState({ total: 0, unjudged: 0 });
+  const [status, setStatus] = useState<"ready" | "loading" | "error">(
+    "loading",
+  );
   const [subjectHistory, setSubjectHistory] = useState<HistoryEntry[]>([]);
   const [currentSubject, setCurrentSubject] =
     useState<SubjectWithAnswers | null>(null);
@@ -42,54 +45,51 @@ export function App() {
   useEffect(() => {
     if (!clientSession.links.next) return;
 
+    setStatus("loading");
+
     fetchNextSubject(clientSession)
       .then((resp) => {
         setCurrentSubject(resp.subject ?? null);
         setCurrentAnswers(resp.subject?.answers ?? {});
+        setStatus("ready");
       })
-      .catch((err) => console.error("Failed to fetch first subject:", err));
+      .catch((err) => {
+        setStatus("error");
+        console.error("Failed to fetch first subject:", err);
+      });
 
     refreshStats().catch((err) => console.error("Failed to fetch stats:", err));
   }, [clientSession.links.next, refreshStats]);
-
-  const findMnemonic = useCallback(async (event: KeyboardEvent) => {
-    event.preventDefault();
-    const target = document.querySelector(
-      `button[data-key-equivalent="${event.key}"]`,
-    ) as HTMLButtonElement | null;
-    if (!target) return;
-    target.classList.add("option-active");
-    target.click();
-    await delay(300);
-    target.classList.remove("option-active");
-  }, []);
 
   useEffect(() => {
     const navBack = () => {
       setSubjectHistory((previous) => {
         if (previous.length === 0) return previous;
         const last = previous[previous.length - 1];
+        setStatus("loading");
         fetchSubject({ clientSession, subject: { id: last.subjectId } })
           .then((fresh) => {
             setCurrentSubject(fresh);
             setCurrentAnswers(last.answers);
+            setStatus("ready");
             try {
               if (popupRef.current) popupRef.current.location = fresh.url;
             } catch {}
           })
-          .catch(console.error);
+          .catch((err) => {
+            setStatus("error");
+            console.error(err);
+          });
         return previous.slice(0, -1);
       });
     };
 
-    document.addEventListener("keyup", findMnemonic);
     window.addEventListener("popstate", navBack);
 
     return () => {
-      document.removeEventListener("keyup", findMnemonic);
       window.removeEventListener("popstate", navBack);
     };
-  }, [findMnemonic]);
+  }, [clientSession]);
 
   const onStart = useCallback(
     (event: Event) => {
@@ -139,11 +139,15 @@ export function App() {
         .then((resp) => {
           setCurrentSubject(resp.subject);
           setCurrentAnswers(resp.subject.answers ?? {});
+          setStatus("ready");
           try {
             if (popupRef.current) popupRef.current.location = resp.subject.url;
           } catch {}
         })
-        .catch(console.error);
+        .catch((err) => {
+          setStatus("error");
+          console.error(err);
+        });
 
       savePromise.finally(() => {
         refreshStats().catch(console.error);
@@ -153,32 +157,44 @@ export function App() {
   );
 
   if (clientSession.links.next == "") {
-    return <QuestionnaireSessionlessPage />;
+    return (
+      <Page status={status}>
+        <QuestionnaireSessionlessPage />
+      </Page>
+    );
   }
 
   if (stats.unjudged < 1)
-    return <QuestionnaireNoSubjectRemaining totalSubjects={stats.total} />;
+    return (
+      <Page status={status}>
+        <QuestionnaireNoSubjectRemaining totalSubjects={stats.total} />
+      </Page>
+    );
 
   if (!started && stats.unjudged >= 1) {
     return (
-      <QuestionnaireOpeningPage
-        onSubmit={onStart}
-        subjectsTotal={stats.total}
-        subjectsUnjudged={stats.unjudged}
-      />
+      <Page status={status}>
+        <QuestionnaireOpeningPage
+          onSubmit={onStart}
+          subjectsTotal={stats.total}
+          subjectsUnjudged={stats.unjudged}
+        />
+      </Page>
     );
   }
 
   if (started && !!currentSubject)
     return (
-      <QuestionnairePage
-        onClick={onStart}
-        onSubmit={onSubmit}
-        questions={clientSession.questions}
-        answers={currentAnswers}
-        subject={currentSubject}
-        unjudgedSubjects={stats.unjudged}
-        totalSubjects={stats.total}
-      />
+      <Page status={status}>
+        <QuestionnairePage
+          onClick={onStart}
+          onSubmit={onSubmit}
+          questions={clientSession.questions}
+          answers={currentAnswers}
+          subject={currentSubject}
+          unjudgedSubjects={stats.unjudged}
+          totalSubjects={stats.total}
+        />
+      </Page>
     );
 }

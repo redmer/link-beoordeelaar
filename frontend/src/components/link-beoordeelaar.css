@@ -41,7 +41,7 @@ body {
 }
 
 a[href] {
-  color: white;
+  color: inherit;
   text-decoration-line: none;
 }
 
@@ -51,7 +51,6 @@ a[href]:hover {
 
 header.colophon,
 footer.diagnostics {
-  background-color: var(--behind-bg-color);
   padding: 1em 2em;
   display: flex;
   justify-content: space-between;
@@ -59,8 +58,8 @@ footer.diagnostics {
   flex-shrink: 0;
 }
 
-header.colophon {
-  justify-content: end;
+footer.diagnostics {
+  background-color: var(--behind-bg-color);
 }
 
 footer.diagnostics:has(> details[open]) {
@@ -98,6 +97,36 @@ main.app {
 
 .measure-wide {
   max-width: 52rem;
+}
+
+.page-centered {
+  margin: auto 0;
+}
+
+.status-bar {
+  --status-bar-bg: var(--behind-bg-color);
+  --status-bar-color: var(--behind-color);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+  background-color: var(--status-bar-bg);
+  color: var(--status-bar-color);
+}
+
+.status-bar[data-status="ready"] {
+  --status-bar-bg: var(--behind-bg-color);
+  --status-bar-color: var(--behind-color);
+}
+
+.status-bar[data-status="loading"] {
+  --status-bar-bg: white;
+  --status-bar-color: #1f2937;
+}
+
+.status-bar[data-status="error"] {
+  --status-bar-bg: #b91c1c;
+  --status-bar-color: white;
 }
 
 progress {

@@ -11,9 +11,14 @@
           "description": "Migrate and categorize"
         },
         {
+          "value": "merge",
+          "label": "Merge 🚩",
+          "description": "Migrate by merging with other"
+        },
+        {
           "value": "delete",
           "label": "Delete it 👋",
-          "description": "Don't migrate"
+          "description": "Don't migrate into new database"
         }
       ]
     },
@@ -24,7 +29,11 @@
       "options": [
         { "value": "index", "label": "List or index page" },
         { "value": "content", "label": "Content page" },
-        { "value": "flag", "label": "Flag for review" }
+        {
+          "value": "flag",
+          "label": "Usage information",
+          "description": "Other pages, like Usage, Discussion, Login, Users, etc."
+        }
       ]
     },
     {
@@ -39,7 +48,7 @@
     }
   ],
   "links": {
-    "next": "http://localhost:7071/api/datasets/523d66f2-cc37-4385-9b4d-cd954e6b456d/next-subject?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D",
+    "next": "http://localhost:7071/api/datasets/89bcda59-ef9a-4690-aaff-e0b91a82e758/next-subject?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D",
     "help": "mailto:noreply@example.com"
   },
   "raw": {
