@@ -20,10 +20,11 @@ export function App() {
   const { errorMessage, setError, setLoading, setReady, status } =
     useAppLoadState();
 
-  const { isBlocked, navigate, open, syncOrOpen } = usePopupWindowManager({
-    name: POPUP_WINDOW,
-    features: "toolbar=no,menubar=no,left=1,top=1",
-  });
+  const { isBlocked, isOpen, navigate, open, syncOrOpen } =
+    usePopupWindowManager({
+      name: POPUP_WINDOW,
+      features: "toolbar=no,menubar=no,left=1,top=1",
+    });
 
   const {
     currentAnswers,
@@ -88,10 +89,14 @@ export function App() {
     syncOrOpen(currentSubject.url);
   }, [currentSubject, syncOrOpen]);
 
+  const popupClosed = started && !!currentSubject && !isOpen;
+  const effectiveStatus = popupClosed ? "error" : status;
+
   const diagnostics = [
     errorMessage,
     saveError,
     isBlocked ? "Popup window was blocked by the browser." : "",
+    popupClosed ? "Popup window is not open." : "",
   ]
     .filter((value) => value !== "")
     .join("\n");
@@ -100,7 +105,7 @@ export function App() {
     console.debug(`!hasSession`);
     return (
       <Page
-        status={status}
+        status={effectiveStatus}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
         diagnostics={diagnostics}
@@ -114,7 +119,7 @@ export function App() {
     console.debug(`stats.unjudged < 1`);
     return (
       <Page
-        status={status}
+        status={effectiveStatus}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
         diagnostics={diagnostics}
@@ -128,7 +133,7 @@ export function App() {
     console.debug(`if (started && !!currentSubject)`);
     return (
       <Page
-        status={status}
+        status={effectiveStatus}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
         diagnostics={diagnostics}
@@ -146,7 +151,7 @@ export function App() {
 
   return (
     <Page
-      status={status}
+      status={effectiveStatus}
       totalSubjects={stats.total}
       unjudgedSubjects={stats.unjudged}
       diagnostics={diagnostics}
