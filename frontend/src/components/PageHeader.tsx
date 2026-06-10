@@ -1,15 +1,37 @@
-import { useContext } from "react";
+import { useContext, type PropsWithChildren } from "react";
 import { ClientSessionContext } from "../hooks/ClientSessionContext.js";
 import label from "../util/lang.js";
+import { Progress } from "./Progress.js";
 
-export function PageHeader(props: { help?: string }) {
+export interface PageHeaderProps extends PropsWithChildren {
+  totalSubjects?: number;
+  unjudgedSubjects?: number;
+  help?: string;
+  status?: "ready" | "loading" | "error";
+}
+
+/** The PageHeader provides */
+export function PageHeader({
+  totalSubjects,
+  unjudgedSubjects,
+  help,
+  status,
+}: PageHeaderProps) {
   const clientSession = useContext(ClientSessionContext);
-  const help = props.help ?? clientSession.links.help ?? label("HELP_URL");
+  const helpLink = help ?? clientSession.links.help ?? label("HELP_URL");
 
   return (
-    <header className="colophon">
+    <header className="colophon status-bar" data-status={status ?? "ready"}>
       <div>
-        <a target="_blank" href={help}>
+        {
+          <Progress
+            totalSubjects={totalSubjects}
+            unjudgedSubjects={unjudgedSubjects}
+          />
+        }
+      </div>
+      <div>
+        <a target="_blank" href={helpLink}>
           {label("HELP_TITLE")}
         </a>
       </div>

@@ -10,16 +10,33 @@ Content-Type: application/json
 {
     "subjects": [
         {
-            "url": "http://example.com",
+            "url": "http://www.wikidata.org/entity/Q42",
             "metadata": {
-                "Publisher": "W3C",
-                "Public": true
+                "Title": "Douglas Adams"
             }
         },
         {
-            "url": "https://rdmr.eu",
+            "url": "http://www.wikidata.org/entity/Q167605",
             "metadata": {
-                "Publisher": ["Redmer", "Rdmr"]
+                "Title": "The Milkmaid (Vermeer)"
+            }
+        },
+        {
+            "url": "http://www.wikidata.org/entity/Q583",
+            "metadata": {
+                "Title": "Mont Blanc"
+            }
+        },
+        {
+            "url": "http://www.wikidata.org/entity/Q2752846",
+            "metadata": {
+                "Title": "Stichting CROW"
+            }
+        },
+        {
+            "url": "http://www.wikidata.org/entity/Q1438044",
+            "metadata": {
+                "Title": "Forschungsgesellschaft für Straßen- und Verkehrswesen"
             }
         }
     ]

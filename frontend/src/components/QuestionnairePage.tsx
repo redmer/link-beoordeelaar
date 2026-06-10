@@ -1,10 +1,10 @@
 import { Component } from "react";
-import { AnswerOptionButton } from "../components/AnswerOption.js";
-import { Progress } from "../components/Progress.js";
-import { PropertiesTable } from "../components/PropertiesTable.js";
-import { Questionnaire } from "../components/QuestionSteps.js";
 import type { Answers, Question, Subject } from "../types.js";
 import label from "../util/lang.js";
+import { AnswerOptionButton } from "./AnswerOption.js";
+import { Hero } from "./Hero.js";
+import { PropertiesTable } from "./PropertiesTable.js";
+import { Questionnaire } from "./QuestionSteps.js";
 
 interface QuestionnairePageProps {
   onSubmit: (...args: any[]) => void;
@@ -17,9 +17,11 @@ interface QuestionnairePageProps {
 }
 
 export function QuestionnairePage(props: QuestionnairePageProps) {
+  const questionnaireKey = `${props.subject.id}:${JSON.stringify(props.answers)}`;
+
   return (
     <div className="page">
-      <PageHeader
+      <Hero
         title={label("APP_TITLE")}
         desc={label("INTRODUCTION")}
         subject={props.subject}
@@ -31,6 +33,7 @@ export function QuestionnairePage(props: QuestionnairePageProps) {
         <PropertiesTable metadata={props.subject.metadata} keys={[]} />
       </footer>
       <Questionnaire
+        key={questionnaireKey}
         questions={props.questions}
         answers={props.answers}
         onSubmit={props.onSubmit}
@@ -43,45 +46,13 @@ export function QuestionnaireNoSubjectRemaining(
   props: Pick<QuestionnairePageProps, "totalSubjects">,
 ) {
   return (
-    <div className="page">
-      <PageHeader
+    <div className="page page-centered">
+      <Hero
         title={`${label("NO_SUBJECTS_REMAINING_TITLE")}: ${props.totalSubjects}/${props.totalSubjects}`}
         desc={label("NO_SUBJECTS_REMAINING_DESC")}
       />
       <main className="measure">
         <p>☑️</p>
-      </main>
-    </div>
-  );
-}
-
-declare class QuestionnaireFinalPageProps {
-  closingText?: string;
-  reportEmail?: string;
-  reportBody: string;
-  answersSentViaEndpoint?: boolean;
-}
-
-export function QuestionnaireFinalPage(props: QuestionnaireFinalPageProps) {
-  const suffix = props.answersSentViaEndpoint ? " ✔" : "";
-  return (
-    <div className="page">
-      <PageHeader
-        title={label("FINAL_TITLE") + suffix}
-        desc={props.closingText ?? label("CLOSING_REMARKS_MAIL")}
-      />
-      <main className="measure">
-        <textarea rows={20} cols={60} readOnly>
-          {props.reportBody}
-        </textarea>
-        <div className="mailto-cta">
-          <a
-            target="_blank"
-            href="mailto:{props.reportEmail}?subject=Linkbeoordeelaar"
-          >
-            {props.reportEmail}
-          </a>
-        </div>
       </main>
     </div>
   );
@@ -95,8 +66,8 @@ declare class QuestionnaireOpeningPageProps {
 
 export function QuestionnaireOpeningPage(props: QuestionnaireOpeningPageProps) {
   return (
-    <div className="page">
-      <PageHeader
+    <div className="page page-centered">
+      <Hero
         title={label("APP_TITLE")}
         desc={label("INTRODUCTION_OPENING")}
         unjudgedSubjects={props.subjectsUnjudged ?? Infinity}
@@ -119,42 +90,12 @@ export function QuestionnaireOpeningPage(props: QuestionnaireOpeningPageProps) {
 export class QuestionnaireSessionlessPage extends Component {
   render() {
     return (
-      <div className="page">
-        <PageHeader
+      <div className="page page-centered">
+        <Hero
           title={label("APP_TITLE")}
           desc={label("INTRODUCTION_SESSIONLESS")}
         />
       </div>
     );
   }
-}
-
-export function PageHeader(props: {
-  title: string;
-  desc: string;
-  unjudgedSubjects?: number;
-  totalSubjects?: number;
-  subject?: Subject;
-  onClick?: () => void;
-}) {
-  return (
-    <header className="measure">
-      <Progress
-        unjudgedSubjects={props.unjudgedSubjects ?? 0}
-        totalSubjects={props.totalSubjects ?? 0}
-      ></Progress>
-      <h1>{props.title}</h1>
-      <h4>
-        <code>{props?.subject?.url}</code>
-        {props.onClick ? (
-          <button className="reopen-popup" onClick={props.onClick}>
-            {label("REOPEN_POPUP")}
-          </button>
-        ) : (
-          <></>
-        )}
-      </h4>
-      <p>{props.desc}</p>
-    </header>
-  );
 }

@@ -7,15 +7,20 @@ import { ErrorBoundary } from "./ErrorBoundary.js";
 import { PageFooter } from "./PageFooter.js";
 import { PageHeader } from "./PageHeader.js";
 
-export function PageFrame(props: PropsWithChildren) {
+export interface PageFrameProps extends PropsWithChildren {
+  diagnostics?: string;
+  status?: "ready" | "error" | "loading";
+}
+
+export function Page({ status, diagnostics, children }: PageFrameProps) {
   return (
     <div id="link-beoordelaar">
       <ClientSessionProvider sessionKey={sessionKey() ?? undefined}>
-        <PageHeader />
+        <PageHeader status={status} />
         <main className="app">
-          <ErrorBoundary>{props.children}</ErrorBoundary>
+          <ErrorBoundary>{children}</ErrorBoundary>
         </main>
-        <PageFooter />
+        <PageFooter diagnostics={diagnostics} />
       </ClientSessionProvider>
     </div>
   );
