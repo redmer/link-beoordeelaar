@@ -11,8 +11,6 @@ interface QuestionnairePageProps {
   questions: Question[];
   answers: Answers;
   subject: Subject;
-  unjudgedSubjects: number;
-  totalSubjects: number;
   onClick: (...args: any[]) => void;
 }
 
@@ -25,8 +23,6 @@ export function QuestionnairePage(props: QuestionnairePageProps) {
         title={label("APP_TITLE")}
         desc={label("INTRODUCTION")}
         subject={props.subject}
-        unjudgedSubjects={props.unjudgedSubjects}
-        totalSubjects={props.totalSubjects}
         onClick={props.onClick}
       />
       <footer>
@@ -42,18 +38,13 @@ export function QuestionnairePage(props: QuestionnairePageProps) {
   );
 }
 
-export function QuestionnaireNoSubjectRemaining(
-  props: Pick<QuestionnairePageProps, "totalSubjects">,
-) {
+export function QuestionnaireNoSubjectRemaining() {
   return (
     <div className="page page-centered">
       <Hero
-        title={`${label("NO_SUBJECTS_REMAINING_TITLE")}: ${props.totalSubjects}/${props.totalSubjects}`}
+        title={`${label("NO_SUBJECTS_REMAINING_TITLE")}`}
         desc={label("NO_SUBJECTS_REMAINING_DESC")}
       />
-      <main className="measure">
-        <p>☑️</p>
-      </main>
     </div>
   );
 }
@@ -67,12 +58,7 @@ declare class QuestionnaireOpeningPageProps {
 export function QuestionnaireOpeningPage(props: QuestionnaireOpeningPageProps) {
   return (
     <div className="page page-centered">
-      <Hero
-        title={label("APP_TITLE")}
-        desc={label("INTRODUCTION_OPENING")}
-        unjudgedSubjects={props.subjectsUnjudged ?? Infinity}
-        totalSubjects={props.subjectsTotal ?? Infinity}
-      />
+      <Hero title={label("APP_TITLE")} desc={label("INTRODUCTION_OPENING")} />
       <main className="measure">
         <form onSubmit={props.onSubmit}>
           <AnswerOptionButton

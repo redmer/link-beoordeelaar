@@ -4,8 +4,6 @@ import label from "../util/lang.js";
 export function Hero(props: {
   title: string;
   desc: string;
-  unjudgedSubjects?: number;
-  totalSubjects?: number;
   subject?: Subject;
   onClick?: () => void;
 }) {
