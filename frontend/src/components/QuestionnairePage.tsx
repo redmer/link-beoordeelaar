@@ -78,9 +78,15 @@ export class QuestionnaireSessionlessPage extends Component {
     return (
       <div className="page page-centered">
         <Hero
-          title={label("APP_TITLE")}
-          desc={label("INTRODUCTION_SESSIONLESS")}
+          title={label("SESSIONLESS_TITLE")}
+          desc={label("SESSIONLESS_DESC")}
         />
+        <main className="measure">
+          <form>
+            <input name="session" type="text"></input>
+            <input type="submit" value={label("START")} />
+          </form>
+        </main>
       </div>
     );
   }

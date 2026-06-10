@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext } from "react";
 import { Page } from "../components/Page.js";
 import {
   QuestionnaireNoSubjectRemaining,
@@ -7,180 +7,103 @@ import {
   QuestionnaireSessionlessPage,
 } from "../components/QuestionnairePage.js";
 import { ClientSessionContext } from "../hooks/ClientSessionContext.js";
-import {
-  fetchDatasetStats,
-  fetchNextSubject,
-  fetchSubject,
-  saveAnswer,
-} from "../stores/Server.js";
-import type { Answers, SubjectWithAnswers } from "../types.js";
+import { useAppLoadState } from "../hooks/useAppLoadState.js";
+import { useNavigationHistory } from "../hooks/useNavigationHistory.js";
+import { usePopupWindowManager } from "../hooks/usePopupWindowManager.js";
+import { useQuestionnaireSession } from "../hooks/useQuestionnaireSession.js";
+import { useSubmissionManager } from "../hooks/useSubmissionManager.js";
 
 const POPUP_WINDOW = "link-beoordelaar-popup";
 
-interface HistoryEntry {
-  subjectId: string;
-  answers: Answers;
-}
-
 export function App() {
-  const popupRef = useRef<Window | null>(null);
   const clientSession = useContext(ClientSessionContext);
+  const { errorMessage, setError, setLoading, setReady, status } =
+    useAppLoadState();
 
-  const [stats, setStats] = useState({ total: 0, unjudged: 0 });
-  const [status, setStatus] = useState<"ready" | "loading" | "error">(
-    "loading",
-  );
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [subjectHistory, setSubjectHistory] = useState<HistoryEntry[]>([]);
-  const [currentSubject, setCurrentSubject] =
-    useState<SubjectWithAnswers | null>(null);
-  const [currentAnswers, setCurrentAnswers] = useState<Answers>({});
-  const [started, setStarted] = useState(false);
+  const { isBlocked, navigate, open, syncOrOpen } = usePopupWindowManager({
+    name: POPUP_WINDOW,
+    features: "toolbar=no,menubar=no,left=1,top=1",
+  });
 
-  const refreshStats = useCallback(async () => {
-    const stats = await fetchDatasetStats(clientSession);
-    setStats({ total: stats.total, unjudged: stats.unjudged });
-  }, [clientSession]);
+  const {
+    currentAnswers,
+    currentSubject,
+    hasSession,
+    refreshStats,
+    restoreCurrent,
+    setCurrent,
+    setStarted,
+    started,
+    stats,
+  } = useQuestionnaireSession({
+    clientSession,
+    setError,
+    setLoading,
+    setReady,
+  });
 
-  // Fetch the first subject when a real session is available.
-  useEffect(() => {
-    const hasSession =
-      clientSession.links.next && clientSession.links.next !== "";
+  const { pushHistory } = useNavigationHistory({
+    clientSession,
+    onRestore: restoreCurrent,
+    onRestoreFailure: (error) => {
+      setError(error, "Failed to restore previous subject");
+      console.error(error);
+    },
+    onRestoreStart: setLoading,
+    onRestoreSuccess: setReady,
+    syncPopup: (url) => {
+      navigate(url);
+    },
+  });
 
-    if (!hasSession) {
-      // Sessionless mode - just set ready state
-      setStatus("ready");
-      setErrorMessage("");
-      setStats({ total: 0, unjudged: 0 });
-      return;
-    }
-
-    // We have a valid session - fetch data
-    setStatus("loading");
-    setErrorMessage("");
-
-    Promise.all([
-      fetchNextSubject(clientSession),
-      fetchDatasetStats(clientSession),
-    ])
-      .then(([subjectResp, statsResp]) => {
-        setCurrentSubject(subjectResp.subject ?? null);
-        setCurrentAnswers(subjectResp.subject?.answers ?? {});
-        setStats({ total: statsResp.total, unjudged: statsResp.unjudged });
-        setStatus("ready");
-        setErrorMessage("");
-      })
-      .catch((err) => {
-        setStatus("error");
-        const errorMsg = `Failed to load session data: ${err?.message || String(err)}`;
-        setErrorMessage(errorMsg);
-        console.error(errorMsg, err);
-      });
-  }, [clientSession]);
-
-  useEffect(() => {
-    const navBack = () => {
-      setSubjectHistory((previous) => {
-        if (previous.length === 0) return previous;
-        const last = previous[previous.length - 1];
-        setStatus("loading");
-        fetchSubject({ clientSession, subject: { id: last.subjectId } })
-          .then((fresh) => {
-            setCurrentSubject(fresh);
-            setCurrentAnswers(last.answers);
-            setStatus("ready");
-            try {
-              if (popupRef.current) popupRef.current.location = fresh.url;
-            } catch {}
-          })
-          .catch((err) => {
-            setStatus("error");
-            console.error(err);
-          });
-        return previous.slice(0, -1);
-      });
-    };
-
-    window.addEventListener("popstate", navBack);
-
-    return () => {
-      window.removeEventListener("popstate", navBack);
-    };
-  }, [clientSession]);
+  const { onSubmit, saveError } = useSubmissionManager({
+    clientSession,
+    currentSubject,
+    onHistoryPush: pushHistory,
+    onSubjectAdvance: (subject) => {
+      setCurrent(subject);
+      if (subject) navigate(subject.url);
+    },
+    onSubmitFailure: (error) => {
+      setError(error, "Failed to load next subject");
+      console.error(error);
+    },
+    onSubmitStart: setLoading,
+    onSubmitSuccess: setReady,
+    refreshStats,
+  });
 
   const onStart = useCallback(
-    (event: Event) => {
+    (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (!currentSubject) return;
-      popupRef.current = window.open(
-        currentSubject.url,
-        POPUP_WINDOW,
-        "toolbar=no,menubar=no,left=1,top=1",
-      );
+      open(currentSubject.url);
       setStarted(true);
     },
-    [currentSubject],
+    [currentSubject, open, setStarted],
   );
 
-  const onSubmit = useCallback(
-    (event: SubmitEvent) => {
-      console.log(`Will submit for subject...`);
-      event.preventDefault();
-      if (!currentSubject) return;
+  const onReopenPopup = useCallback(() => {
+    if (!currentSubject) return;
+    syncOrOpen(currentSubject.url);
+  }, [currentSubject, syncOrOpen]);
 
-      // The form contains all answers
-      const form = document.querySelector("form");
-      if (!form) return;
+  const diagnostics = [
+    errorMessage,
+    saveError,
+    isBlocked ? "Popup window was blocked by the browser." : "",
+  ]
+    .filter((value) => value !== "")
+    .join("\n");
 
-      const data = new FormData(form);
-      const answers: Answers = {};
-      for (const [k, v] of data.entries()) {
-        if (k in answers) answers[k].push(v.toString());
-        else answers[k] = [v.toString()];
-      }
-
-      // Subject is fully answered: save in background and advance to next.
-      const savePromise = saveAnswer({
-        answers,
-        subject: currentSubject,
-        clientSession,
-      }).catch(console.error);
-
-      history.pushState({ subjectId: currentSubject.id, answers }, "");
-      setSubjectHistory((prev) => [
-        ...prev,
-        { subjectId: currentSubject.id, answers },
-      ]);
-
-      fetchNextSubject(clientSession)
-        .then((resp) => {
-          setCurrentSubject(resp.subject);
-          setCurrentAnswers(resp.subject.answers ?? {});
-          setStatus("ready");
-          try {
-            if (popupRef.current) popupRef.current.location = resp.subject.url;
-          } catch {}
-        })
-        .catch((err) => {
-          setStatus("error");
-          console.error(err);
-        });
-
-      savePromise.finally(() => {
-        refreshStats().catch(console.error);
-      });
-    },
-    [clientSession, currentAnswers, currentSubject, refreshStats],
-  );
-
-  if (clientSession.links.next == "") {
-    console.debug(`clientSession.links.next == ""`);
+  if (!hasSession) {
+    console.debug(`!hasSession`);
     return (
       <Page
         status={status}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
-        diagnostics={errorMessage}
+        diagnostics={diagnostics}
       >
         <QuestionnaireSessionlessPage />
       </Page>
@@ -194,27 +117,9 @@ export function App() {
         status={status}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
-        diagnostics={errorMessage}
+        diagnostics={diagnostics}
       >
-        <QuestionnaireNoSubjectRemaining totalSubjects={stats.total} />
-      </Page>
-    );
-  }
-
-  if (!started && stats.unjudged >= 1) {
-    console.debug(`if (!started && stats.unjudged >= 1) {`);
-    return (
-      <Page
-        status={status}
-        totalSubjects={stats.total}
-        unjudgedSubjects={stats.unjudged}
-        diagnostics={errorMessage}
-      >
-        <QuestionnaireOpeningPage
-          onSubmit={onStart}
-          subjectsTotal={stats.total}
-          subjectsUnjudged={stats.unjudged}
-        />
+        <QuestionnaireNoSubjectRemaining />
       </Page>
     );
   }
@@ -226,18 +131,31 @@ export function App() {
         status={status}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
-        diagnostics={errorMessage}
+        diagnostics={diagnostics}
       >
         <QuestionnairePage
-          onClick={onStart}
+          onClick={onReopenPopup}
           onSubmit={onSubmit}
           questions={clientSession.questions}
           answers={currentAnswers}
           subject={currentSubject}
-          unjudgedSubjects={stats.unjudged}
-          totalSubjects={stats.total}
         />
       </Page>
     );
   }
+
+  return (
+    <Page
+      status={status}
+      totalSubjects={stats.total}
+      unjudgedSubjects={stats.unjudged}
+      diagnostics={diagnostics}
+    >
+      <QuestionnaireOpeningPage
+        onSubmit={onStart}
+        subjectsTotal={stats.total}
+        subjectsUnjudged={stats.unjudged}
+      />
+    </Page>
+  );
 }
