@@ -179,33 +179,42 @@ main.app {
   box-shadow:
     0 10px 10px hsla(0, 100%, 0%, 15%),
     inset 0 1px hsla(var(--anti-theme-hue), 75%, 62%, 75%);
-}
 
-.option:hover {
-  background-color: var(--card-bg-hover);
-  border: 2px solid var(--behind-bg-color);
-}
+  input {
+    margin-right: 0.5rem;
+  }
 
-.input-label input:checked + .option {
-  background-color: var(--card-checked-bg-color);
-  color: var(--card-checked-color);
-  border-color: var(--focus-bg-color);
+  h2 {
+    display: flex;
+    align-items: center;
+  }
 
-  box-shadow:
-    0 10px 10px hsla(0, 100%, 0%, 15%),
-    inset 0 -1px 8px hsla(var(--anti-theme-hue), 75%, 62%, 75%);
-}
+  &:hover {
+    background-color: var(--card-bg-hover);
+    border: 2px solid var(--behind-bg-color);
+  }
+  &:active {
+    background-color: var(--card-active-bg-color);
+    color: var(--card-active-color);
+  }
 
-.option:active,
-.option-active {
-  background-color: var(--card-active-bg-color);
-  color: var(--card-active-color);
+  &:has(input:checked) {
+    background-color: var(--card-checked-bg-color);
+    color: var(--card-checked-color);
+    border-color: var(--focus-bg-color);
+
+    box-shadow:
+      0 10px 10px hsla(0, 100%, 0%, 15%),
+      inset 0 -1px 8px hsla(var(--anti-theme-hue), 75%, 62%, 75%);
+  }
 }
 
 /* Keyboard focus */
 fieldset:focus,
 fieldset:focus-within {
-  background-color: var(--focus-bg-color);
+  background-color: hsla(
+    from var(--focus-bg-color) calc(h * 2) calc(s * 0.8) calc(l * 1.2) / 0.3
+  );
 }
 
 fieldset {

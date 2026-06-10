@@ -54,7 +54,7 @@
   "raw": {
     "next": {
       "and": [
-        { "not": { "contains": { "field": "answers.q1", "value": "delete" } } },
+        { "not": { "exists": { "field": "answers.q1" } } },
         { "not": { "exists": { "field": "answers.q2" } } },
         { "not": { "exists": { "field": "answers.q3" } } }
       ]
