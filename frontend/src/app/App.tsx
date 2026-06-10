@@ -158,7 +158,11 @@ export function App() {
 
   if (clientSession.links.next == "") {
     return (
-      <Page status={status}>
+      <Page
+        status={status}
+        totalSubjects={stats.total}
+        unjudgedSubjects={stats.unjudged}
+      >
         <QuestionnaireSessionlessPage />
       </Page>
     );
@@ -166,14 +170,22 @@ export function App() {
 
   if (stats.unjudged < 1)
     return (
-      <Page status={status}>
+      <Page
+        status={status}
+        totalSubjects={stats.total}
+        unjudgedSubjects={stats.unjudged}
+      >
         <QuestionnaireNoSubjectRemaining totalSubjects={stats.total} />
       </Page>
     );
 
   if (!started && stats.unjudged >= 1) {
     return (
-      <Page status={status}>
+      <Page
+        status={status}
+        totalSubjects={stats.total}
+        unjudgedSubjects={stats.unjudged}
+      >
         <QuestionnaireOpeningPage
           onSubmit={onStart}
           subjectsTotal={stats.total}
@@ -185,7 +197,11 @@ export function App() {
 
   if (started && !!currentSubject)
     return (
-      <Page status={status}>
+      <Page
+        status={status}
+        totalSubjects={stats.total}
+        unjudgedSubjects={stats.unjudged}
+      >
         <QuestionnairePage
           onClick={onStart}
           onSubmit={onSubmit}
