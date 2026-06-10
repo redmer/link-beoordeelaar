@@ -46,27 +46,27 @@ export interface AnswerOption {
 
 export function AnswerOptionButton(props: AnswerOption) {
   return (
-    <div className="input-label">
-      <input
-        type={
-          props.mode == "one"
-            ? "radio"
-            : props.mode == "multiple"
-              ? "checkbox"
-              : "submit"
-        }
-        name={props.name}
-        id={`opt-${props.value}`}
-        value={props.value}
-        data-key-equivalent={props.mnemonic}
-        defaultChecked={props.checked}
-      ></input>
-      <label className="option" htmlFor={`opt-${props.value}`}>
-        <Mnemonic keyboard={props.mnemonic} />
-        <h2 className="option-title">{props.label}</h2>
-        <p className="option-description">{props.description}</p>
-      </label>
-    </div>
+    <label className="option" htmlFor={`opt-${props.value}`}>
+      <Mnemonic keyboard={props.mnemonic} />
+      <h2 className="option-title">
+        <input
+          type={
+            props.mode == "one"
+              ? "radio"
+              : props.mode == "multiple"
+                ? "checkbox"
+                : "submit"
+          }
+          name={props.name}
+          id={`opt-${props.value}`}
+          value={props.value}
+          data-key-equivalent={props.mnemonic}
+          defaultChecked={props.checked}
+        ></input>
+        <span className="option-title">{props.label}</span>
+      </h2>
+      <p className="option-description">{props.description}</p>
+    </label>
   );
 }
 
