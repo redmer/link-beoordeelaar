@@ -76,7 +76,7 @@ export function App() {
         setErrorMessage(errorMsg);
         console.error(errorMsg, err);
       });
-  }, [clientSession.links.next]);
+  }, [clientSession]);
 
   useEffect(() => {
     const navBack = () => {
