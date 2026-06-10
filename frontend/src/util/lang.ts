@@ -2,7 +2,7 @@ import { Formatter } from "./StringFormat.js";
 
 const baseTranslation = {
   /* Add translations here */
-  APP_TITLE: "🧑‍⚖️ Categorize",
+  APP_TITLE: "Categorize 🧑‍⚖️",
   CHOOSE_MULTIPLE: "*️⃣ Choose multiple",
   CHOOSE_ONE: "1️⃣ Choose one",
   CHOOSE_REQUIRED: "🔷 Required",
@@ -14,15 +14,15 @@ const baseTranslation = {
   ITEMS_REMAINING: `{0} remaining`,
   LANGUAGE: "English",
   NO_SUBJECTS_REMAINING_DESC: `Thank you for participating. Your response has been recorded.`,
-  NO_SUBJECTS_REMAINING_TITLE: `🍵 This session is completely done.`,
-  REOPEN_POPUP: "Reopen popup window",
+  NO_SUBJECTS_REMAINING_TITLE: `This session is complete 🍵`,
+  REOPEN_POPUP: "Reopen popup window 🔄️",
   SESSIONLESS_DESC: `Provide a session key that refers to the questionnaire you want filled out.`,
-  SESSIONLESS_TITLE: `No session configured`,
+  SESSIONLESS_TITLE: `No session configured 🗝️`,
   START_DESC:
     "Start categorizing links. You must allow popups from this website.",
   START: "▶️ Start",
-  SUBMIT_DESC: `Save categorization and open next link. To skip, refresh page.`,
-  SUBMIT_TITLE: "💾 Save and next",
+  SUBMIT_DESC: `Save categorization and open next link.`,
+  SUBMIT_TITLE: "Save & next 💾",
   SUBMIT_SECTION: `Submit`,
 } as const;
 
@@ -33,30 +33,28 @@ export const UI_TRANSLATIONS: Record<
   /* Add languages here */
   en: baseTranslation,
   nl: {
+    APP_TITLE: "Beoordeel 🧑‍⚖️",
+    CHOOSE_MULTIPLE: "*️⃣ Kies één of meerdere",
+    CHOOSE_ONE: "1️⃣ Kies één",
+    CHOOSE_REQUIRED: "🔷 Required",
+    DIAGNOSTICS_TITLE: "Onder de motorkap",
     HELP_TITLE: "Ondersteuning",
     HELP_URL: "https://rdmr.eu/link-beoordeelaar/docs/help/enduser/nl",
-    DIAGNOSTICS_TITLE: "Onder de motorkap",
-    LANGUAGE: "Nederlands",
-    APP_TITLE: "Beoordeel",
-    FINAL_TITLE: "Klaar om in te sturen",
-    SUBMIT_TITLE: "Bewaar en volgende",
-    SUBMIT_DESC: `Sla beoordeling op en open de volgende link om te beoordelen. 
-      Om over te slaan, ververs pagina.`,
-    CHOOSE_ONE: "Kies één",
-    CHOOSE_MULTIPLE: "Kies meerdere",
-    START: "Start",
-    START_DESC: "Begin met beoordelen van links",
-    REOPEN_POPUP: "Heropen popupvenster",
-    INTRODUCTION: `Beoordeel de link geopend in de popup door op een van de
-      opties te klikken. Elk antwoord wordt meteen bewaard.`,
-    SESSIONLESS_DESC: `Open deze pagina met een sessiesleutel die
-      verwijst naar de lijst van links die moeten worden beoordeeld.`,
-    INTRODUCTION_OPENING: `Beoordeel de links die openen in een popup door op een
-      van de opties te klikken. Druk op START om te beginnen.`,
-    NO_SUBJECTS_REMAINING_TITLE: `Onderzoek klaar`,
-    NO_SUBJECTS_REMAINING_DESC: `Bedankt. Je beoordelingen zijn opgeslagen.`,
+    INTRODUCTION_OPENING: `Kies de toepasselijke categorieën voor de link die straks opent in een popupvenster. Druk op START om te beginnen. Je kunt altijd bewaren en later doorgaan.`,
+    INTRODUCTION: `De bovenstaande link is geopend in het popupvenster. Beoordeel het door een van de onderstaande opties te kiezen. Je kunt altijd bewaren en later doorgaan.`,
     ITEMS_REMAINING: `{0} nog te gaan`,
-    SESSIONLESS_TITLE: "Sessiesleutel ontbreekt",
+    LANGUAGE: "Nederlands",
+    NO_SUBJECTS_REMAINING_DESC: `Bedankt voor het beoordelen. Je antwoorden zijn opgeslagen.`,
+    NO_SUBJECTS_REMAINING_TITLE: `Deze sessie is klaar 🍵`,
+    REOPEN_POPUP: "Heropen popupvenster 🔄️",
+    SESSIONLESS_DESC: `Geef een sessiesleutel in.`,
+    SESSIONLESS_TITLE: `Onbekende sessie 🗝️`,
+    START_DESC:
+      "Begin met beoordelen van links. Popups van deze website moeten zijn toegestaan.",
+    START: "▶️ Start",
+    SUBMIT_DESC: `Sla beoordeling op en open de volgende link om te beoordelen.`,
+    SUBMIT_TITLE: "Bewaar 💾 en volgende",
+    SUBMIT_SECTION: `Submit`,
   },
 };
 
