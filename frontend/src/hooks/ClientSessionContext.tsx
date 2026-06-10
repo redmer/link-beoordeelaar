@@ -19,24 +19,22 @@ export function sessionKey(): string | null {
   return params.get("session");
 }
 
-export interface Props extends PropsWithChildren {
-  sessionKey?: string;
-}
-
-export function ClientSessionProvider(props: Props) {
+export function ClientSessionProvider({ children }: PropsWithChildren) {
   const [clientSession, setClientSession] = useState<ClientSession>(
     DEFAULT_CLIENT_SESSION,
   );
 
   useEffect(() => {
     let isCancelled = false;
+    const params = new URLSearchParams(window.location.search);
+    const sessionKey = params.get("session");
 
-    if (!props.sessionKey) {
+    if (!sessionKey) {
       setClientSession(DEFAULT_CLIENT_SESSION);
       return;
     }
 
-    fetchClientSession(props.sessionKey)
+    fetchClientSession(sessionKey)
       .then((session) => {
         if (isCancelled) return;
         setClientSession(session);
@@ -50,11 +48,11 @@ export function ClientSessionProvider(props: Props) {
     return () => {
       isCancelled = true;
     };
-  }, [props.sessionKey]);
+  }, [window.location.search]);
 
   return (
     <ClientSessionContext.Provider value={clientSession}>
-      {props.children}
+      {children}
     </ClientSessionContext.Provider>
   );
 }

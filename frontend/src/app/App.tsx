@@ -30,6 +30,7 @@ export function App() {
   const [status, setStatus] = useState<"ready" | "loading" | "error">(
     "loading",
   );
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [subjectHistory, setSubjectHistory] = useState<HistoryEntry[]>([]);
   const [currentSubject, setCurrentSubject] =
     useState<SubjectWithAnswers | null>(null);
@@ -43,23 +44,39 @@ export function App() {
 
   // Fetch the first subject when a real session is available.
   useEffect(() => {
-    if (!clientSession.links.next) return;
+    const hasSession =
+      clientSession.links.next && clientSession.links.next !== "";
 
+    if (!hasSession) {
+      // Sessionless mode - just set ready state
+      setStatus("ready");
+      setErrorMessage("");
+      setStats({ total: 0, unjudged: 0 });
+      return;
+    }
+
+    // We have a valid session - fetch data
     setStatus("loading");
+    setErrorMessage("");
 
-    fetchNextSubject(clientSession)
-      .then((resp) => {
-        setCurrentSubject(resp.subject ?? null);
-        setCurrentAnswers(resp.subject?.answers ?? {});
+    Promise.all([
+      fetchNextSubject(clientSession),
+      fetchDatasetStats(clientSession),
+    ])
+      .then(([subjectResp, statsResp]) => {
+        setCurrentSubject(subjectResp.subject ?? null);
+        setCurrentAnswers(subjectResp.subject?.answers ?? {});
+        setStats({ total: statsResp.total, unjudged: statsResp.unjudged });
         setStatus("ready");
+        setErrorMessage("");
       })
       .catch((err) => {
         setStatus("error");
-        console.error("Failed to fetch first subject:", err);
+        const errorMsg = `Failed to load session data: ${err?.message || String(err)}`;
+        setErrorMessage(errorMsg);
+        console.error(errorMsg, err);
       });
-
-    refreshStats().catch((err) => console.error("Failed to fetch stats:", err));
-  }, [clientSession.links.next, refreshStats]);
+  }, [clientSession.links.next]);
 
   useEffect(() => {
     const navBack = () => {
@@ -157,34 +174,41 @@ export function App() {
   );
 
   if (clientSession.links.next == "") {
+    console.debug(`clientSession.links.next == ""`);
     return (
       <Page
         status={status}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
+        diagnostics={errorMessage}
       >
         <QuestionnaireSessionlessPage />
       </Page>
     );
   }
 
-  if (stats.unjudged < 1)
+  if (stats.unjudged < 1) {
+    console.debug(`stats.unjudged < 1`);
     return (
       <Page
         status={status}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
+        diagnostics={errorMessage}
       >
         <QuestionnaireNoSubjectRemaining totalSubjects={stats.total} />
       </Page>
     );
+  }
 
   if (!started && stats.unjudged >= 1) {
+    console.debug(`if (!started && stats.unjudged >= 1) {`);
     return (
       <Page
         status={status}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
+        diagnostics={errorMessage}
       >
         <QuestionnaireOpeningPage
           onSubmit={onStart}
@@ -195,12 +219,14 @@ export function App() {
     );
   }
 
-  if (started && !!currentSubject)
+  if (started && !!currentSubject) {
+    console.debug(`if (started && !!currentSubject)`);
     return (
       <Page
         status={status}
         totalSubjects={stats.total}
         unjudgedSubjects={stats.unjudged}
+        diagnostics={errorMessage}
       >
         <QuestionnairePage
           onClick={onStart}
@@ -213,4 +239,5 @@ export function App() {
         />
       </Page>
     );
+  }
 }

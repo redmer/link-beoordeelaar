@@ -23,7 +23,7 @@ export function Page({
 }: PageFrameProps) {
   return (
     <div id="link-beoordelaar">
-      <ClientSessionProvider sessionKey={sessionKey() ?? undefined}>
+      <ClientSessionProvider>
         <PageHeader
           status={status}
           totalSubjects={totalSubjects}
