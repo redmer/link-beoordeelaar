@@ -120,7 +120,7 @@ main.app {
 }
 
 .status-bar[data-status="loading"] {
-  --status-bar-bg: white;
+  --status-bar-bg: #198ca8;
   --status-bar-color: #1f2937;
 }
 
@@ -214,11 +214,37 @@ fieldset {
   font-size: large;
   font-weight: bold;
   text-transform: uppercase;
+  aspect-ratio: 1;
+  width: auto;
+  height: 1.5rem;
+  text-align: center;
 }
 
-legend .mnemonic {
+legend {
+  background-color: white;
+  display: flex;
+  align-items: center;
   border-radius: 0.5rem;
-  margin-right: 0.5rem;
+  padding: 0.2rem 0.5rem;
+
+  .mnemonic {
+    border-radius: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  .legend-text {
+    display: flex;
+    flex-direction: column;
+    color: black;
+  }
+
+  .legend-label {
+    font-size: larger;
+  }
+
+  .legend-explanation {
+    color: darkgray;
+  }
 }
 
 .option .mnemonic {
@@ -306,5 +332,5 @@ button.reopen-popup:active {
 }
 
 button.reopen-popup::after {
-  content: " 🕵️‍♀️";
+  content: " 🔄️";
 }

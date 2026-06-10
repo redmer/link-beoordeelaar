@@ -1,8 +1,4 @@
 import { type PropsWithChildren } from "react";
-import {
-  ClientSessionProvider,
-  sessionKey,
-} from "../hooks/ClientSessionContext.js";
 import { ErrorBoundary } from "./ErrorBoundary.js";
 import { PageFooter } from "./PageFooter.js";
 import { PageHeader } from "./PageHeader.js";
@@ -23,17 +19,15 @@ export function Page({
 }: PageFrameProps) {
   return (
     <div id="link-beoordelaar">
-      <ClientSessionProvider>
-        <PageHeader
-          status={status}
-          totalSubjects={totalSubjects}
-          unjudgedSubjects={unjudgedSubjects}
-        />
-        <main className="app">
-          <ErrorBoundary>{children}</ErrorBoundary>
-        </main>
-        <PageFooter diagnostics={diagnostics} />
-      </ClientSessionProvider>
+      <PageHeader
+        status={status}
+        totalSubjects={totalSubjects}
+        unjudgedSubjects={unjudgedSubjects}
+      />
+      <main className="app">
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </main>
+      <PageFooter diagnostics={diagnostics} />
     </div>
   );
 }

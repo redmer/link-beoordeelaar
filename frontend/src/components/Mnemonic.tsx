@@ -4,10 +4,10 @@ export interface Props {
 
 export function Mnemonic(props: Props) {
   return (
-    <span className="mnemonic">
+    <div className="mnemonic">
       <kbd title={`press ${props.keyboard} with keyboard`}>
         {props.keyboard}
       </kbd>
-    </span>
+    </div>
   );
 }

@@ -110,10 +110,13 @@ export function Questionnaire(props: Props) {
           />
         );
       })}
-      <fieldset tabIndex={-1}>
+      <fieldset tabIndex={0}>
         <legend>
           <Mnemonic keyboard="0" />
-          Final
+          <div className="legend-text">
+            <div className="legend-label">{label("SUBMIT_SECTION")}</div>
+            <div className="legend-explanation">{label("CHOOSE_REQUIRED")}</div>
+          </div>
         </legend>
         <div className="option-list">
           <AnswerSubmitButton />
@@ -131,14 +134,17 @@ export interface SingleProps {
 
 export function QuestionStep(props: SingleProps) {
   return (
-    <fieldset tabIndex={-1}>
+    <fieldset tabIndex={0}>
       <legend>
         <Mnemonic keyboard={props.mnemonic} />
-        {props.question.label} (
-        {props.question.mode == "one"
-          ? label("CHOOSE_ONE")
-          : label("CHOOSE_MULTIPLE")}
-        )
+        <div className="legend-text">
+          <div className="legend-label">{props.question.label}</div>
+          <div className="legend-explanation">
+            {props.question.mode == "one"
+              ? label("CHOOSE_ONE")
+              : label("CHOOSE_MULTIPLE")}
+          </div>
+        </div>
       </legend>
       <AnswerGroup
         options={props.question.options}
