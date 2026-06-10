@@ -1,5 +1,5 @@
 @host = localhost:7071
-@dataset = 523d66f2-cc37-4385-9b4d-cd954e6b456d
+@dataset = 89bcda59-ef9a-4690-aaff-e0b91a82e758
 @subject = 60059341-1517-4eae-af77-7b92ae51551c
 
 #### Create a dataset
@@ -57,3 +57,7 @@ GET http://{{host}}/api/datasets/{{dataset}}/stats?filter=%7B%22and%22%3A%5B%7B%
 #### Fetch a single subject
 
 GET http://{{host}}/api/datasets/{{dataset}}/subjects/{{subject}}
+
+#### Download a dataset
+
+GET http://{{host}}/api/datasets/{{dataset}}/download
