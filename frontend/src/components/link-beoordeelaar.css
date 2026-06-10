@@ -190,6 +190,10 @@ main.app {
   background-color: var(--card-checked-bg-color);
   color: var(--card-checked-color);
   border-color: var(--focus-bg-color);
+
+  box-shadow:
+    0 10px 10px hsla(0, 100%, 0%, 15%),
+    inset 0 -1px 8px hsla(var(--anti-theme-hue), 75%, 62%, 75%);
 }
 
 .option:active,
@@ -233,6 +237,7 @@ legend {
   .mnemonic {
     border-radius: 0.5rem;
     margin-right: 0.5rem;
+    border: 1px solid var(--behind-bg-color);
   }
 
   .legend-text {
@@ -253,8 +258,8 @@ legend {
 .option .mnemonic {
   display: block;
   position: absolute;
-  top: 1px;
-  right: 1px;
+  top: 0px;
+  right: 0px;
 }
 
 /* Properties table */
