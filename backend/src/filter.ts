@@ -141,7 +141,11 @@ function buildExpression(
       return null;
     }
     const paramName = addParam(state, expr.eq.value);
-    return `${fieldPath} = ${paramName}`;
+    // Guard with IS_DEFINED so that comparing a missing property yields a
+    // well-defined boolean instead of `undefined`. This makes `NOT eq(...)`
+    // behave intuitively: it matches documents where the field is missing
+    // OR where it has a different value.
+    return `(IS_DEFINED(${fieldPath}) AND ${fieldPath} = ${paramName})`;
   }
 
   if ("exists" in expr) {
