@@ -80,7 +80,7 @@ export function useQuestionnaireSession({
       fetchDatasetStats(clientSession),
     ])
       .then(([subjectResp, statsResp]) => {
-        setCurrent(subjectResp.subject ?? null);
+        setCurrent(subjectResp?.subject ?? null);
         setStats(toStatsState(statsResp));
         setReady();
       })
