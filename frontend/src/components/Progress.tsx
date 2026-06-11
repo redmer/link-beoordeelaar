@@ -6,30 +6,36 @@ export interface ProgressProps {
 }
 
 export function Progress({ totalSubjects, unjudgedSubjects }: ProgressProps) {
-  if (!totalSubjects || !unjudgedSubjects) {
+  if (!totalSubjects) {
     return <progress></progress>;
   }
 
-  const judgedSubjects = totalSubjects - unjudgedSubjects;
+  const unjudged = unjudgedSubjects ?? 0;
+
+  const judgedSubjects = totalSubjects - unjudged;
   const percentage = judgedSubjects / totalSubjects;
-  const pctStr = Intl.NumberFormat(undefined, {
+  const pctfmt = new Intl.NumberFormat(undefined, {
     style: "percent",
     maximumFractionDigits: 0,
-  }).format(percentage);
+  });
+  const decfmt = new Intl.NumberFormat(undefined, {
+    style: "decimal",
+    maximumFractionDigits: 0,
+  });
+
+  const title = `${label("ITEMS_DONE", pctfmt.format(percentage), decfmt.format(totalSubjects))}`;
 
   return (
-    <div className="progress-container">
-      <label htmlFor="progress-dataset">0</label>
+    <div className="progress-container" title={title}>
       <progress
         id="progress-dataset"
         value={judgedSubjects}
         max={totalSubjects}
-        title={pctStr}
       >
-        {pctStr}
+        {title}
       </progress>
       <label htmlFor="progress-dataset">
-        {label("ITEMS_REMAINING", unjudgedSubjects.toFixed(0))}
+        {label("ITEMS_REMAINING", unjudged.toFixed(0))}
       </label>
     </div>
   );

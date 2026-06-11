@@ -11,9 +11,13 @@ import type {
 /** Get new subject to judge. */
 export async function fetchNextSubject(
   clientSession: ClientSession,
-): Promise<SubjectNextResp> {
+): Promise<SubjectNextResp | null> {
   const resp = await fetch(clientSession.links.next);
-  return await resp.json();
+  try {
+    return await resp.json();
+  } catch (err) {
+    return null;
+  }
 }
 
 export async function fetchDatasetStats(
