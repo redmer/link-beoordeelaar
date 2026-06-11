@@ -49,28 +49,34 @@ export function useSubmissionManager({
 
       onSubmitStart();
 
+      const submittedSubject = currentSubject;
       const answers = toAnswers(event.currentTarget);
-      onHistoryPush({ subjectId: currentSubject.id, answers });
-      history.pushState({ subjectId: currentSubject.id, answers }, "");
+      onHistoryPush({ subjectId: submittedSubject.id, answers });
+      history.pushState({ subjectId: submittedSubject.id, answers }, "");
 
-      fetchNextSubject(clientSession)
+      // IMPORTANT: save the current answer BEFORE asking the backend for the
+      // next subject. If these run in parallel the backend may still consider
+      // the current subject "unjudged" and return it again as the next one.
+      // When that happens, neither `subject.id` nor `answers` change, so the
+      // form's remount-key in QuestionnairePage stays identical and the
+      // uncontrolled radio inputs in the DOM keep their previous selections.
+      saveAnswer({ answers, subject: submittedSubject, clientSession })
+        .then(() => {
+          setSaveError("");
+        })
+        .catch((error) => {
+          setSaveError(
+            `Failed to save answers for ${submittedSubject.id}: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          console.error(error);
+        })
+        .then(() => fetchNextSubject(clientSession))
         .then((response) => {
           onSubjectAdvance(response.subject ?? null);
           onSubmitSuccess();
         })
         .catch((error) => {
           onSubmitFailure(error);
-        });
-
-      saveAnswer({ answers, subject: currentSubject, clientSession })
-        .then(() => {
-          setSaveError("");
-        })
-        .catch((error) => {
-          setSaveError(
-            `Failed to save answers for ${currentSubject.id}: ${error instanceof Error ? error.message : String(error)}`,
-          );
-          console.error(error);
         })
         .finally(() => {
           refreshStats().catch((error) => {
