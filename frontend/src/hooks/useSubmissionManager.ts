@@ -16,6 +16,12 @@ interface UseSubmissionManagerOptions {
   onSubmitStart: () => void;
   onSubmitSuccess: () => void;
   refreshStats: () => Promise<void>;
+  /**
+   * Called synchronously at the start of every submission so the caller can
+   * force the answer-form subtree to remount. This makes uncontrolled inputs
+   * structurally safe even if the backend re-serves the same subject.
+   */
+  bumpFormKey: () => void;
 }
 
 function toAnswers(form: HTMLFormElement): Answers {
@@ -31,6 +37,7 @@ function toAnswers(form: HTMLFormElement): Answers {
 }
 
 export function useSubmissionManager({
+  bumpFormKey,
   clientSession,
   currentSubject,
   onHistoryPush,
@@ -45,6 +52,7 @@ export function useSubmissionManager({
   const onSubmit = useCallback(
     (event: React.SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
+      bumpFormKey();
       if (!currentSubject) return;
 
       onSubmitStart();
@@ -85,6 +93,7 @@ export function useSubmissionManager({
         });
     },
     [
+      bumpFormKey,
       clientSession,
       currentSubject,
       onHistoryPush,
