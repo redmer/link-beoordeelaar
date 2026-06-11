@@ -12,10 +12,11 @@ interface QuestionnairePageProps {
   answers: Answers;
   subject: Subject;
   onClick: (...args: any[]) => void;
+  formKey?: number;
 }
 
 export function QuestionnairePage(props: QuestionnairePageProps) {
-  const questionnaireKey = `${props.subject.id}:${JSON.stringify(props.answers)}`;
+  const questionnaireKey = `${props.subject.id}:${props.formKey ?? 0}`;
 
   return (
     <div className="page">

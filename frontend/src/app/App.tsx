@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import { Page } from "../components/Page.js";
 import {
   QuestionnaireNoSubjectRemaining,
@@ -19,6 +19,15 @@ export function App() {
   const clientSession = useContext(ClientSessionContext);
   const { errorMessage, setError, setLoading, setReady, status } =
     useAppLoadState();
+
+  // Monotonic counter used as the questionnaire form's remount key. Bumped
+  // on every event that should clear uncontrolled answer inputs (submission
+  // and back-navigation), so the remount happens regardless of whether the
+  // resulting subject id or answers happen to match the previous render.
+  const [formKey, setFormKey] = useState(0);
+  const bumpFormKey = useCallback(() => {
+    setFormKey((n) => n + 1);
+  }, []);
 
   const { isBlocked, isOpen, navigate, open, syncOrOpen } =
     usePopupWindowManager({
@@ -45,7 +54,13 @@ export function App() {
 
   const { pushHistory } = useNavigationHistory({
     clientSession,
-    onRestore: restoreCurrent,
+    onRestore: (subject, answers) => {
+      restoreCurrent(subject, answers);
+      // Force the questionnaire form to remount when navigating back, so
+      // uncontrolled inputs are recreated rather than reused with stale
+      // checked state from a previous submission of the same subject.
+      bumpFormKey();
+    },
     onRestoreFailure: (error) => {
       setError(error, "Failed to restore previous subject");
       console.error(error);
@@ -58,6 +73,7 @@ export function App() {
   });
 
   const { onSubmit, saveError } = useSubmissionManager({
+    bumpFormKey,
     clientSession,
     currentSubject,
     onHistoryPush: pushHistory,
@@ -75,7 +91,7 @@ export function App() {
   });
 
   const onStart = useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
+    (event: React.SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (!currentSubject) return;
       open(currentSubject.url);
@@ -144,6 +160,7 @@ export function App() {
           questions={clientSession.questions}
           answers={currentAnswers}
           subject={currentSubject}
+          formKey={formKey}
         />
       </Page>
     );
