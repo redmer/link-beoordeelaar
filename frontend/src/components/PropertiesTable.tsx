@@ -10,16 +10,15 @@ export function PropertiesTable(props: {
         Object.entries(props.metadata).map(([key, rawvalue]) => {
           // If there are allowed-keys, then skip if key is in them
           if (props.keys.length > 0 && props.keys.indexOf(key) == -1)
-            return <></>;
+            return null;
 
           // If the value is None, N/A, etc., skip
-          if (["", undefined, null].indexOf(rawvalue as any) != -1)
-            return <></>;
+          if (["", undefined, null].indexOf(rawvalue as any) != -1) return null;
 
           const value = String(rawvalue);
 
           return (
-            <div className="keep-together kv-pair">
+            <div className="keep-together kv-pair" key={key + value}>
               <dt>{key}</dt>
               <dd>
                 <code>{value}</code>

@@ -24,7 +24,7 @@ export async function fetchDatasetStats(
   clientSession: ClientSession,
 ): Promise<DatasetStatsResp> {
   const url = new URL(clientSession.links.next);
-  const datasetBase = clientSession.links.next.split("/next-subject", 1);
+  const datasetBase = clientSession.links.next.split("/next-subject", 1)[0];
   const resp = await fetch(`${datasetBase}/stats${url.search}`);
   return await resp.json();
 }
@@ -36,7 +36,7 @@ export async function fetchSubject({
   clientSession: ClientSession;
   subject: Pick<Subject, "id">;
 }): Promise<SubjectWithAnswers> {
-  const datasetBase = clientSession.links.next.split("/next-subject", 1);
+  const datasetBase = clientSession.links.next.split("/next-subject", 1)[0];
   const resp = await fetch(`${datasetBase}/subjects/${subject.id}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -61,7 +61,7 @@ export async function saveAnswer({
   subject: Subject;
   clientSession: ClientSession;
 }): Promise<void> {
-  const datasetBase = clientSession.links.next.split("/next-subject", 1);
+  const datasetBase = clientSession.links.next.split("/next-subject", 1)[0];
   const body = JSON.stringify({
     answers,
   } as SubjectPatchReq);

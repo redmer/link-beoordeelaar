@@ -31,7 +31,7 @@ export function PageHeader({
         }
       </div>
       <div>
-        <a target="_blank" href={helpLink}>
+        <a target="_blank" href={helpLink} rel="noopener noreferrer">
           {label("HELP_TITLE")}
         </a>
       </div>
