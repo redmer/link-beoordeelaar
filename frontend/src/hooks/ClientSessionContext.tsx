@@ -1,14 +1,10 @@
 import type { PropsWithChildren } from "react";
 import { createContext, useEffect, useState } from "react";
-import { fetchClientSession } from "../stores/Client.js";
+import {
+  DEFAULT as DEFAULT_CLIENT_SESSION,
+  fetchClientSession,
+} from "../stores/Client.js";
 import type { ClientSession } from "../types.js";
-import label from "../util/lang.js";
-
-const DEFAULT_CLIENT_SESSION: ClientSession = {
-  links: { next: "", help: label("HELP_URL") },
-  questions: [],
-  lang: "en",
-};
 
 export const ClientSessionContext = createContext<ClientSession>(
   DEFAULT_CLIENT_SESSION,
@@ -26,15 +22,14 @@ export function ClientSessionProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     let isCancelled = false;
-    const params = new URLSearchParams(window.location.search);
-    const sessionKey = params.get("session");
+    const key = sessionKey();
 
-    if (!sessionKey) {
+    if (!key) {
       setClientSession(DEFAULT_CLIENT_SESSION);
       return;
     }
 
-    fetchClientSession(sessionKey)
+    fetchClientSession(key)
       .then((session) => {
         if (isCancelled) return;
         setClientSession(session);

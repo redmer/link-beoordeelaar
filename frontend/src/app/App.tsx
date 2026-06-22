@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Page } from "../components/Page.js";
 import {
   QuestionnaireNoSubjectRemaining,
@@ -19,6 +19,10 @@ export function App() {
   const clientSession = useContext(ClientSessionContext);
   const { errorMessage, setError, setLoading, setReady, status } =
     useAppLoadState();
+
+  useEffect(() => {
+    document.body.lang = clientSession.lang ?? "";
+  }, [clientSession.lang]);
 
   // Monotonic counter used as the questionnaire form's remount key. Bumped
   // on every event that should clear uncontrolled answer inputs (submission
