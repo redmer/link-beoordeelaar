@@ -9,7 +9,6 @@ export interface AnswerOption {
   value: string; // machine readable value to be set in table
   label: string; // readable interface label
   description?: string; // optional interface sublabel
-  final?: true; // This answer option makes this subject done, so client may fetch next subject
 }
 
 export interface ClientSession {

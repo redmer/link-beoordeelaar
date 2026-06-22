@@ -1,10 +1,37 @@
 {
   "$schema": "./configuration.schema.json",
-  "subjects": [
-    { "url": "https://en.wikipedia.org/wiki/Las_Meninas" }, 
-    { "url": "https://en.wikipedia.org/wiki/Portrait_of_a_Young_Girl_(Christus)" }, 
-    { "url": "https://en.wikipedia.org/wiki/After_the_Deluge_(painting)" }
+  "lang": "en",
+  "questions": [
+    {
+      "id": "q1",
+      "mode": "one",
+      "label": "Keep this link?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Keep 🤍",
+          "description": "Migrate to the new database"
+        },
+        {
+          "value": "delete",
+          "label": "Delete 👋",
+          "description": "Don't migrate"
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "mode": "multiple",
+      "label": "Themes",
+      "options": [
+        { "value": "policy", "label": "Policy" },
+        { "value": "infrastructure", "label": "Infrastructure" },
+        { "value": "social", "label": "Social" }
+      ]
+    }
   ],
-  "reporting": { "email": "info@example.org" },
-  "answerOptions": [{ "name": "Like 🤍" }, { "name": "Meh 😴" }]
+  "links": {
+    "next": "https://example.org/api/datasets/89bcda59-ef9a-4690-aaff-e0b91a82e758/next-subject",
+    "help": "https://example.org/help"
+  }
 }
