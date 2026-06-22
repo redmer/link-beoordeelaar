@@ -2,54 +2,169 @@
 
 This document describes how to prepare `link-beoordeelaar` for your users.
 
+`link-beoordeelaar` consists of two pieces:
+
+- a **frontend** (a static web page) that your users open in their browser; and
+- a **backend** (Azure Functions + Cosmos DB) that stores the URLs to be judged
+  (the _dataset_) and collects the answers.
+
+To run a session, you:
+
+1. [Deploy the frontend and backend](#deploy-link-beoordeelaar).
+2. [Create a dataset](#create-a-dataset) on the backend with the URLs you
+   want judged.
+3. [Author a session configuration](#session-configuration) (a JSON file)
+   that points at that dataset and lists the questions to ask.
+4. [Generate a session key](#generate-session-key) and send it to your users.
+5. When users are done, [download the dataset](#download-the-dataset).
+
 ## Deploy `link-beoordeelaar`
 
-This application works statically from `https://rdmr.eu/link-beoordeelaar/`.
-Provide your [session key](#generate-session-key) and you can use this website.
+The frontend works statically from `https://rdmr.eu/link-beoordeelaar/`.
+You can also deploy it on your own domain by cloning
+[the repository](https://github.com/redmer/link-beoordeelaar) and following
+your internal steps to publish the contents of `frontend/`.
 
-You can also deploy the app on your own domain.
-Clone [this repository](https://github.com/redmer/link-beoordeelaar) and follow your internal steps to deploy it.
+The backend (`backend/`) is an Azure Functions app that requires an Azure
+Cosmos DB account. Configure these environment variables when deploying:
+
+| Variable           | Default            | Description                                |
+| ------------------ | ------------------ | ------------------------------------------ |
+| `COSMOS_ENDPOINT`  | _(required)_       | URI of the Cosmos DB account.              |
+| `COSMOS_KEY`       | _(required)_       | Primary or read/write key.                 |
+| `COSMOS_DATABASE`  | `link-beoordelaar` | Database id (created if missing).          |
+| `COSMOS_CONTAINER` | `subjects`         | Container id (partition key `/datasetId`). |
+
+The endpoints `POST /datasets/create` and `GET /datasets/{dataset}/download` require an Azure Functions key (`authLevel: function`).
+The endpoints used by users' browsers (`next-subject`, `stats`, `subjects/{id}`, `subjects/{id}/answers`) are anonymous.
+
+You may deploy the backend using `func azure functionapp publish $NAME --build remote`.
+
+## Create a dataset
+
+Send the URLs to be judged to the backend:
+
+```http
+POST https://<your-backend>/api/datasets/create?code=<function-key>
+Content-Type: application/json
+
+{
+  "subjects": [
+    { "url": "https://en.wikipedia.org/wiki/Las_Meninas",
+      "metadata": { "Title": "Las Meninas" } },
+    { "url": "https://en.wikipedia.org/wiki/Portrait_of_a_Young_Girl_(Christus)",
+      "metadata": { "Title": "Portrait of a Young Girl" } }
+  ]
+}
+```
+
+Each subject **must** have a `url`.
+Duplicate URLs are removed automatically.
+You **may** include arbitrary `metadata` (string, number or null values), which is shown to the user as context for the URL.
+
+The response contains the new dataset id:
+
+```json
+{ "id": "89bcda59-ef9a-4690-aaff-e0b91a82e758" }
+```
+
+Note the id; you'll need it for the session configuration and for downloading the results.
 
 ## Session Configuration
 
+A session configuration is a JSON file describing the questions to ask and where the dataset lives.
+It implements the [`ClientSession`](#schema) interface.
+
+### Minimal example
+
+```json
+{
+  "questions": [
+    {
+      "id": "q1",
+      "mode": "one",
+      "label": "Keep?",
+      "options": [
+        { "value": "keep", "label": "Keep this ✅" },
+        { "value": "delete", "label": "Delete it 👋" }
+      ]
+    }
+  ],
+  "links": {
+    "next": "https://<your-backend>/api/datasets/89bcda59-ef9a-4690-aaff-e0b91a82e758/next-subject"
+  }
+}
+```
+
+Host this JSON anywhere your users' browsers can fetch it
+(it is loaded with CORS, so make sure the host allows that).
+
+### Schema
+
+```ts
+interface ClientSession {
+  questions: Question[];
+  lang?: "en" | "nl";
+  links: {
+    next: string; // URL to /datasets/{id}/next-subject (optionally with ?filter=...)
+    help?: string; // shown in the page footer; defaults to the bundled help page
+  };
+}
+
+interface Question {
+  id: string; // matches keys in the saved `answers` object
+  mode: "one" | "multiple"; // single-choice or multi-choice
+  label: string; // shown in the interface
+  options: AnswerOption[];
+}
+
+interface AnswerOption {
+  value: string; // machine-readable, stored in answers
+  label: string; // shown in the interface
+  description?: string; // shown as sublabel
+}
+```
+
+A formal JSON Schema is available at [`schema/configuration.schema.json`](../../schema/configuration.schema.json),
+with a working example in [`schema/example.json`](../../schema/example.json).
+
 ### Next-subject filters
 
-ClientSessions can add a `filter` query parameter to the `links.next` URL. The
-value is a URL-encoded JSON object that describes which subjects are eligible
-to be returned by `/datasets/{dataset}/next-subject`.
+The `links.next` URL may contain a `filter` query parameter.
+Its value is a URL-encoded JSON object that describes which subjects are eligible to be returned by `/datasets/{dataset}/next-subject`.
+The same filter is applied to `/datasets/{dataset}/stats` to compute the _unjudged_ count.
 
-The filter supports basic boolean composition and matching against
-`metadata.<key>` and `answers.<questionId>` fields.
+The filter supports basic boolean composition and matching against `metadata.<key>` and `answers.<questionId>` fields.
 
 Supported operators:
 
 - `and` / `or` / `not`
-- `eq` (field equals value)
-- `contains` (array contains value)
-- `exists` (field is defined)
+- `eq`: field equals value
+- `contains`: field is an array that contains value
+- `exists`: field is defined
+
+Allowed fields:
+
+- `id`, `url`
+- `metadata.<key>`
+- `answers.<questionId>`
 
 #### Example
 
-"Give me a subject where `q1` is not `delete`, and where not all of the other
-answers are already present."
+"Give me a subject where `q1` is not `delete`,
+and where not all of the other answers are already present."
 
 ```json
 {
   "and": [
+    { "not": { "contains": { "field": "answers.q1", "value": "delete" } } },
     {
-      "not": {
-        "contains": { "field": "answers.q1", "value": "delete" }
-      }
-    },
-    {
-      "not":
-        { "exists": { "field": "answers.q2" } },
-    ,
-        "not":
-          { "exists": { "field": "answers.q3" } }
-
-      }
-
+      "or": [
+        { "not": { "exists": { "field": "answers.q1" } } },
+        { "not": { "exists": { "field": "answers.q2" } } },
+        { "not": { "exists": { "field": "answers.q3" } } }
+      ]
+    }
   ]
 }
 ```
@@ -57,14 +172,8 @@ answers are already present."
 URL-encoded (for `?filter=`):
 
 ```
-%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22and%22%3A%5B%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%2C%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%5D%7D%7D%5D%7D
+%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22or%22%3A%5B%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q1%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D%5D%7D
 ```
-
-#### Allowed fields
-
-- `id`, `url`
-- `metadata.<key>`
-- `answers.<questionId>`
 
 #### Exists example
 
@@ -76,28 +185,56 @@ URL-encoded (for `?filter=`):
 
 ## Generate Session Key
 
-Once you have deployed the [session configuration](#session-configuration) somewhere your users' webbrowser may find it, you can generate the session key.
+Once you have deployed the [session configuration](#session-configuration) somewhere your users' browsers can fetch it, you can generate the session key.
 
-The session key is the Base64-encoded (URI-safe) representation of the URL to the session configuration JSON.
+The session key is the Base64-encoded (URL-safe) representation of the URL to the session configuration JSON.
 
 > **Example**
 >
-> If the JSON file is hosted at `https://example.org/data.json`, the key can be generated on the command line interface:
+> If the JSON file is hosted at `https://example.org/data.json`,
+> the key can be generated on the command line thus:
 >
 > ```bash
 > $ echo -n "https://example.org/data.json" | base64
 > aHR0cHM6Ly9leGFtcGxlLm9yZy9kYXRhLmpzb24=
 > ```
 >
-> Your session key is this code, without the last one or two `=` signs.
+> Your session key is this code, without the trailing `=` signs.
 > Other programming languages and online services also provide Base64 encoding.
 
-Send your session key to your users by appending it to the deployed website, `?session=` and the session key.
+Send your session key to your users by appending `?session=<key>` to the URL of the deployed frontend.
 
 > **Example**
 >
 > - `https://rdmr.eu/link-beoordeelaar/?session=aHR0cHM6Ly9leGFtcGxlLm9yZy9kYXRhLmpzb24`
 > - `https://example.org/link-beoordeelaar?session=aHR0cHM6Ly9leGFtcGxlLm9yZy9kYXRhLmpzb24`
+
+Different users may share the same session key:
+the backend hands out one randomly chosen unjudged subject at a time, so multiple reviewers can work through the same dataset in parallel.
+
+## Download the dataset
+
+Once the session is finished, retrieve all subjects and their answers:
+
+```http
+GET https://<your-backend>/api/datasets/{dataset}/download?code=<function-key>
+```
+
+The response contains the dataset id and a `results` array. Each result is a
+subject with its `url`, `metadata`, and the `answers` map, where keys are
+question ids and values are arrays of the chosen answer values.
+
+```ts
+interface DatasetDownloadResp {
+  id: string;
+  results: Array<{
+    id: string;
+    url: string;
+    metadata?: Record<string, string | number | null>;
+    answers: Record<string, string[]>;
+  }>;
+}
+```
 
 ## Help
 

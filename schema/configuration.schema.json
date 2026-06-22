@@ -1,69 +1,78 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$comment": "A schema to judge URLs by with <https://github.com/redmer/link-beoordelaar>.",
+  "$comment": "Session configuration (ClientSession) for <https://github.com/redmer/link-beoordeelaar>.",
   "type": "object",
-  "required": ["subjects", "reporting"],
+  "required": ["questions", "links"],
   "properties": {
     "lang": {
       "$comment": "The interface language",
       "type": "string",
       "enum": ["nl", "en"]
     },
-    "help": {
-      "$comment": "Link to more explanantion",
-      "type": "string",
-      "format": "uri"
-    },
-    "bestBefore": {
-      "$comment": "End date, displayed in interface, not forced in code",
-      "type": "string",
-      "format": "date"
-    },
-    "subjects": {
-      "$comment": "The individual subjects of a session. The objects must have minimally the property `uri`.",
+    "questions": {
+      "$comment": "The ordered list of questions to ask for each subject.",
       "type": "array",
-      "items": {
-        "type": "object",
-        "properties": { "url": { "type": "string", "format": "uri" } },
-        "additionalProperties": true
-      }
+      "items": { "$ref": "#/definitions/Question" }
     },
-    "keys": {
-      "$comment": "Limit the subject's keys in the interface to those specified here. `url` is always used.",
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "answerOptions": {
-      "$comment": "The allowed answers per subject",
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "required": ["name"],
-        "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "value": { "type": "string" }
-        }
-      }
-    },
-    "reporting": {
-      "$comment": "The manner of reporting, either by email or endpoint",
+    "links": {
       "type": "object",
-      "oneOf": [{ "required": ["endpoint"] }, { "required": ["email"] }],
+      "required": ["next"],
       "properties": {
-        "endpoint": {
+        "next": {
+          "$comment": "URL to /datasets/{id}/next-subject on the backend, optionally with ?filter=...",
           "type": "string",
           "format": "uri"
         },
-        "email": {
+        "help": {
+          "$comment": "Link shown in the page footer; defaults to the bundled help page.",
           "type": "string",
-          "format": "email"
+          "format": "uri"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Question": {
+      "type": "object",
+      "required": ["id", "mode", "label", "options"],
+      "properties": {
+        "id": {
+          "$comment": "Identifier; matches a key in the saved `answers` object.",
+          "type": "string"
         },
-        "keys": {
-          "$comment": "Limit the subject's keys in the report to those specified here.",
+        "mode": {
+          "$comment": "Single- or multi-choice.",
+          "type": "string",
+          "enum": ["one", "multiple"]
+        },
+        "label": { "type": "string" },
+        "options": {
           "type": "array",
-          "items": { "type": "string" }
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/AnswerOption" }
+        }
+      }
+    },
+    "AnswerOption": {
+      "type": "object",
+      "required": ["value", "label"],
+      "properties": {
+        "value": {
+          "$comment": "Machine-readable value, stored in answers.",
+          "type": "string"
+        },
+        "label": {
+          "$comment": "Human-readable label shown in the interface.",
+          "type": "string"
+        },
+        "description": {
+          "$comment": "Optional sub-label.",
+          "type": "string"
+        },
+        "final": {
+          "$comment": "When true, this answer alone marks the subject as done.",
+          "type": "boolean",
+          "const": true
         }
       }
     }
