@@ -60,8 +60,8 @@ export function useQuestionnaireSession({
 
   const advanceToNext = useCallback(async () => {
     const response = await fetchNextSubject(clientSession);
-    setCurrent(response.subject ?? null);
-    return response.subject ?? null;
+    setCurrent(response?.subject ?? null);
+    return response?.subject ?? null;
   }, [clientSession, setCurrent]);
 
   useEffect(() => {

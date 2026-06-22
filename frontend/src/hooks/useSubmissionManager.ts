@@ -80,7 +80,7 @@ export function useSubmissionManager({
         })
         .then(() => fetchNextSubject(clientSession))
         .then((response) => {
-          onSubjectAdvance(response.subject ?? null);
+          onSubjectAdvance(response?.subject ?? null);
           onSubmitSuccess();
         })
         .catch((error) => {

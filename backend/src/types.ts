@@ -25,6 +25,7 @@ export interface DatasetCreateReq {
   subjects: Array<{
     url: string;
     metadata?: Record<string, string | number | null>;
+    answers?: Answers;
   }>;
 }
 
