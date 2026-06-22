@@ -40,34 +40,50 @@ export function useNavigationHistory({
     syncPopup,
   };
 
+  // Track the live history outside React so the popstate handler can read
+  // it synchronously without depending on stale closures or interleaved
+  // StrictMode double-invocations of the state updater.
+  const historyRef = useRef<HistoryEntry[]>([]);
+
   const pushHistory = useCallback((entry: HistoryEntry) => {
-    setSubjectHistory((previous) => [...previous, entry]);
+    historyRef.current = [...historyRef.current, entry];
+    setSubjectHistory(historyRef.current);
   }, []);
 
   useEffect(() => {
     const navBack = () => {
-      setSubjectHistory((previous) => {
-        if (previous.length === 0) return previous;
+      const previous = historyRef.current;
+      if (previous.length === 0) return;
 
-        const last = previous[previous.length - 1];
-        const handlers = handlersRef.current;
-        handlers.onRestoreStart();
+      const last = previous[previous.length - 1];
+      historyRef.current = previous.slice(0, -1);
+      setSubjectHistory(historyRef.current);
 
-        fetchSubject({
-          clientSession: handlers.clientSession,
-          subject: { id: last.subjectId },
+      const handlers = handlersRef.current;
+      handlers.onRestoreStart();
+
+      // Push a fresh state entry so any "forward" history entries (which
+      // point at subjects we have already navigated away from) are
+      // truncated by the browser. Without this, pressing Forward — or any
+      // subsequent popstate — would re-fire navBack against stale state
+      // and confuse the app.
+      history.pushState(
+        { subjectId: last.subjectId, answers: last.answers, restored: true },
+        "",
+      );
+
+      fetchSubject({
+        clientSession: handlers.clientSession,
+        subject: { id: last.subjectId },
+      })
+        .then((subject) => {
+          handlers.onRestore(subject, last.answers);
+          handlers.onRestoreSuccess();
+          handlers.syncPopup(subject.url);
         })
-          .then((subject) => {
-            handlers.onRestore(subject, last.answers);
-            handlers.onRestoreSuccess();
-            handlers.syncPopup(subject.url);
-          })
-          .catch((error) => {
-            handlers.onRestoreFailure(error);
-          });
-
-        return previous.slice(0, -1);
-      });
+        .catch((error) => {
+          handlers.onRestoreFailure(error);
+        });
     };
 
     window.addEventListener("popstate", navBack);

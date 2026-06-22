@@ -1,4 +1,4 @@
-import type { Container } from "@azure/cosmos";
+import type { Container, OperationInput } from "@azure/cosmos";
 import {
   app,
   HttpRequest,
@@ -65,14 +65,35 @@ export async function datasetsCreate(
     datasetId,
     url: subject.url.trim(),
     metadata: subject.metadata,
-    answers: {},
+    answers: subject.answers ?? {},
     type: "subject",
     createdAt: now,
     updatedAt: now,
   }));
 
-  for (const item of items) {
-    await container.items.create(item);
+  // Cosmos DB transactional batch: up to 100 operations per call, all sharing
+  // the same partition key (datasetId). 2 MB max payload per batch.
+  const BATCH_SIZE = 100;
+  try {
+    for (let i = 0; i < items.length; i += BATCH_SIZE) {
+      const chunk = items.slice(i, i + BATCH_SIZE);
+      const operations: OperationInput[] = chunk.map((item) => ({
+        operationType: "Create",
+        resourceBody: { ...item },
+      }));
+      const response = await container.items.batch(operations, datasetId);
+      if (response.code && response.code >= 400) {
+        const failed = response.result?.find((r) => r.statusCode >= 400);
+        throw new Error(
+          `Batch insert failed (status ${response.code}): ${
+            failed ? JSON.stringify(failed) : "unknown sub-operation error"
+          }`,
+        );
+      }
+    }
+  } catch (error) {
+    context.error(error);
+    return { status: 500, body: "Failed to write subjects to Cosmos DB." };
   }
 
   return {
