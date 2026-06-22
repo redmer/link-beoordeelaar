@@ -24,7 +24,8 @@
 }
 
 html,
-body {
+body,
+#root {
   background-color: var(--bg-color);
   color: var(--color);
   font-family: var(--font-stack);

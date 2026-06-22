@@ -43,7 +43,7 @@ export async function datasetsGetSubject(
       return { status: 404 };
     }
     context.error(error);
-    return { status: 500, body: "Failed to update subject." };
+    return { status: 500, body: "Failed to get subject." };
   }
 }
 

@@ -5,12 +5,13 @@
     "target": "es2025",
     "checkJs": true,
     "strict": true,
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "types": ["jest"],
     "esModuleInterop": true,
-    "module": "nodenext",
+    "module": "esnext",
+    "forceConsistentCasingInFileNames": true,
     "noEmit": true
   },
   "exclude": ["node_modules", "build", "rollup.config.js", "jest.config.js"]

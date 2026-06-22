@@ -59,8 +59,6 @@ export function useSubmissionManager({
 
       const submittedSubject = currentSubject;
       const answers = toAnswers(event.currentTarget);
-      onHistoryPush({ subjectId: submittedSubject.id, answers });
-      history.pushState({ subjectId: submittedSubject.id, answers }, "");
 
       // IMPORTANT: save the current answer BEFORE asking the backend for the
       // next subject. If these run in parallel the backend may still consider
@@ -68,15 +66,24 @@ export function useSubmissionManager({
       // When that happens, neither `subject.id` nor `answers` change, so the
       // form's remount-key in QuestionnairePage stays identical and the
       // uncontrolled radio inputs in the DOM keep their previous selections.
+      //
+      // History (both the in-memory history stack and the browser history
+      // entry) is only pushed AFTER the save succeeds. If the save fails,
+      // we abort the chain via `throw` and the user stays on the same
+      // subject without a stale "back" entry pointing at a never-saved
+      // submission.
       saveAnswer({ answers, subject: submittedSubject, clientSession })
         .then(() => {
           setSaveError("");
+          onHistoryPush({ subjectId: submittedSubject.id, answers });
+          history.pushState({ subjectId: submittedSubject.id, answers }, "");
         })
         .catch((error) => {
           setSaveError(
             `Failed to save answers for ${submittedSubject.id}: ${error instanceof Error ? error.message : String(error)}`,
           );
           console.error(error);
+          throw error;
         })
         .then(() => fetchNextSubject(clientSession))
         .then((response) => {

@@ -20,6 +20,7 @@ export function AnswerGroup(props: AnswerGroupProps) {
       {answers.map((answer, n) => {
         return (
           <AnswerOptionButton
+            key={n}
             mode={props.mode}
             name={props.name}
             value={answer.value!}
@@ -45,8 +46,14 @@ export interface AnswerOption {
 }
 
 export function AnswerOptionButton(props: AnswerOption) {
+  // Scope the option's DOM id with the question's `name` so the same option
+  // `value` (e.g. "yes"/"no") used across different questions on the same page
+  // does not produce duplicate ids. Duplicate ids would break the wrapping
+  // <label htmlFor=...> targeting and could cause clicks/keyboard focus to
+  // activate the wrong input.
+  const optionId = `opt-${props.name ?? "anon"}-${props.value}`;
   return (
-    <label className="option" htmlFor={`opt-${props.value}`}>
+    <label className="option" htmlFor={optionId}>
       <Mnemonic keyboard={props.mnemonic} />
       <h2 className="option-title">
         <input
@@ -58,7 +65,7 @@ export function AnswerOptionButton(props: AnswerOption) {
                 : "submit"
           }
           name={props.name}
-          id={`opt-${props.value}`}
+          id={optionId}
           value={props.value}
           data-key-equivalent={props.mnemonic}
           defaultChecked={props.checked}
