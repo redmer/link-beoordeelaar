@@ -31,12 +31,14 @@ jobs:
               run: npm ci
 
             - name: Build frontend
-              run: npm --workspace frontend run build
+              run: npm run build
+              working-directory: frontend
 
             - name: Assemble Pages site
               run: |
                   mkdir -p _site
                   cp -r docs/. _site/
+                  cp -r schema/ _site/
                   cp frontend/index.html _site/index.html
                   cp -r frontend/dist _site/dist
                   # Include CSS referenced from frontend/index.html (src/components/link-beoordeelaar.css)
@@ -49,7 +51,7 @@ jobs:
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v5
               with:
-                  path: _site
+                  path: _site/
 
     deploy:
         needs: build
