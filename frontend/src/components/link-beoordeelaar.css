@@ -20,7 +20,7 @@
   --focus-bg-color: hsl(var(--anti-theme-hue), 75%, 62%);
   --focus-color: black;
 
-  --font-stack: "Franklin Gothic", sans-serif;
+  --font-stack: system-ui, sans-serif;
 }
 
 html,
@@ -148,17 +148,17 @@ main.app {
   grid-auto-flow: row dense;
   gap: 1em;
   user-select: none;
-}
 
-@media screen and (min-width: 30em) {
-  .option-list {
+  @media screen and (min-width: 30em) {
     grid-template-columns: 1fr 1fr;
   }
-}
 
-@media screen and (min-width: 60em) {
-  .option-list {
+  @media screen and (min-width: 60em) {
     grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  @media screen and (min-width: 80em) {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 }
 

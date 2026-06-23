@@ -11,7 +11,7 @@ export interface AnswerGroupProps {
 
 export function AnswerGroup(props: AnswerGroupProps) {
   const mnemonic = (index: number) => {
-    return ["f", "j", "d", "k", "s", "l", "a", ";", "u", "i", "o", "p"][index];
+    return ["a", "s", "d", "f", "j", "k", "l", ";", "z", "x", "c", "v"][index];
   };
 
   const answers = props.options;
@@ -72,7 +72,9 @@ export function AnswerOptionButton(props: AnswerOption) {
         ></input>
         <span className="option-title">{props.label}</span>
       </h2>
-      <p className="option-description">{props.description}</p>
+      {props.description && (
+        <p className="option-description">{props.description}</p>
+      )}
     </label>
   );
 }

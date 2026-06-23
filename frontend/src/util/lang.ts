@@ -3,12 +3,12 @@ import { Formatter } from "./StringFormat.js";
 const baseTranslation = {
   /* Add translations here */
   APP_TITLE: "Categorize 🧑‍⚖️",
-  CHOOSE_MULTIPLE: "*️⃣ Choose multiple",
+  CHOOSE_MULTIPLE: "✳️ Choose one or multiple",
   CHOOSE_ONE: "1️⃣ Choose one",
   CHOOSE_REQUIRED: "🔷 Required",
   DIAGNOSTICS_TITLE: "Internals",
   HELP_TITLE: "Help and Support",
-  HELP_URL: "https://rdmr.eu/link-beoordeelaar/docs/help/enduser/en",
+  HELP_URL: "https://rdmr.eu/link-beoordeelaar/help/enduser/en",
   INTRODUCTION_OPENING: `Choose the applicable categories for the link that opens in a popup window, by choosing one of the provided options. Press START to begin. You must allow the popups to appear. You can always reload this page, all your categorizations are safe.`,
   INTRODUCTION: `The above link has been opened in the popup window. Categorize it by choosing from the below options. You can always save and submit to decide on an answer later.`,
   ITEMS_DONE: `{0} done of {1} links`,
@@ -37,12 +37,12 @@ export const UI_TRANSLATIONS: Record<
   en: baseTranslation,
   nl: {
     APP_TITLE: "Beoordeel 🧑‍⚖️",
-    CHOOSE_MULTIPLE: "*️⃣ Kies één of meerdere",
+    CHOOSE_MULTIPLE: "✳️ Kies één of meerdere",
     CHOOSE_ONE: "1️⃣ Kies één",
-    CHOOSE_REQUIRED: "🔷 Required",
+    CHOOSE_REQUIRED: "🔷 Verplicht",
     DIAGNOSTICS_TITLE: "Onder de motorkap",
     HELP_TITLE: "Ondersteuning",
-    HELP_URL: "https://rdmr.eu/link-beoordeelaar/docs/help/enduser/nl",
+    HELP_URL: "https://rdmr.eu/link-beoordeelaar/help/enduser/nl",
     INTRODUCTION_OPENING: `Kies de toepasselijke categorieën voor de link die straks opent in een popupvenster. Druk op START om te beginnen. Je kunt altijd bewaren en later doorgaan.`,
     INTRODUCTION: `De bovenstaande link is geopend in het popupvenster. Beoordeel het door een van de onderstaande opties te kiezen. Je kunt altijd bewaren en later doorgaan.`,
     ITEMS_DONE: `{0} voltooid van {1} links`,
@@ -60,7 +60,7 @@ export const UI_TRANSLATIONS: Record<
     START: "▶️ Start",
     SUBMIT_DESC: `Sla beoordeling op en open de volgende link om te beoordelen.`,
     SUBMIT_TITLE: "Bewaar 💾 en volgende",
-    SUBMIT_SECTION: `Submit`,
+    SUBMIT_SECTION: `Indienen`,
   },
 };
 
