@@ -162,7 +162,16 @@ function buildExpression(
       return null;
     }
     const paramName = addParam(state, expr.contains.value);
-    return `IS_DEFINED(${fieldPath}) AND ARRAY_CONTAINS(${fieldPath}, ${paramName})`;
+    // `contains` matches either:
+    //   - a string field containing the substring (CONTAINS), or
+    //   - an array field containing the value as an element (ARRAY_CONTAINS).
+    // We guard each branch with the matching IS_* check so a wrong-typed
+    // field doesn't blow up the whole expression. The outer parens keep
+    // precedence sane when wrapped in NOT/AND/OR.
+    return (
+      `((IS_STRING(${fieldPath}) AND CONTAINS(${fieldPath}, ${paramName})) ` +
+      `OR (IS_ARRAY(${fieldPath}) AND ARRAY_CONTAINS(${fieldPath}, ${paramName})))`
+    );
   }
 
   return null;
