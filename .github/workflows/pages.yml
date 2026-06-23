@@ -34,19 +34,45 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-      - name: Assemble Pages site
+      - name: Assemble Pages source
+        shell: bash
         run: |
-          mkdir -p _site
-          cp -r docs/* _site
-          cp -r schema/ _site/
-          cp frontend/index.html _site/index.html
-          cp -r frontend/dist _site/dist
-          # Include CSS referenced from frontend/index.html (src/components/link-beoordeelaar.css)
-          mkdir -p _site/src/components
-          cp frontend/src/components/link-beoordeelaar.css _site/src/components/link-beoordeelaar.css
+          set -euo pipefail
+          mkdir -p _src
+          # docs/ contains _config.yml so Jekyll renders the markdown files
+          # with the Primer theme + default layout (matching the legacy
+          # "Deploy from a branch" GitHub Pages experience).
+          cp -r docs/. _src/
+          cp -r schema _src/schema
+          cp frontend/index.html _src/index.html
+          cp -r frontend/dist _src/dist
+          # Include CSS referenced from frontend/index.html
+          # (src/components/link-beoordeelaar.css)
+          mkdir -p _src/src/components
+          cp frontend/src/components/link-beoordeelaar.css \
+             _src/src/components/link-beoordeelaar.css
+
+          # Jekyll only renders markdown files that have YAML front matter.
+          # The legacy GitHub Pages pipeline added it implicitly; mirror that
+          # by prepending empty front matter to any .md file that lacks it,
+          # so they render as themed .html pages.
+          while IFS= read -r -d '' f; do
+            if ! head -n 1 "$f" | grep -qE '^---[[:space:]]*$'; then
+              tmp="$(mktemp)"
+              printf -- '---\n---\n' > "$tmp"
+              cat "$f" >> "$tmp"
+              mv "$tmp" "$f"
+            fi
+          done < <(find _src -type f -name '*.md' -print0)
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./_src
+          destination: ./_site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
