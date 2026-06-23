@@ -37,7 +37,7 @@ jobs:
       - name: Assemble Pages site
         run: |
           mkdir -p _site
-          cp -r docs/. _site/
+          cp -r docs/* _site
           cp -r schema/ _site/
           cp frontend/index.html _site/index.html
           cp -r frontend/dist _site/dist
