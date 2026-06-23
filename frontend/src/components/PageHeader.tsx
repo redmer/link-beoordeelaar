@@ -4,7 +4,7 @@ import label from "../util/lang.js";
 import { Progress } from "./Progress.js";
 
 export interface PageHeaderProps extends PropsWithChildren {
-  totalSubjects?: number;
+  totalSubjects?: number | null;
   unjudgedSubjects?: number;
   help?: string;
   status?: "ready" | "loading" | "error";

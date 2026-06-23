@@ -61,7 +61,8 @@ export function QuestionnaireNoSubjectRemaining() {
 declare class QuestionnaireOpeningPageProps {
   onSubmit: (...args: any[]) => void;
   subjectsUnjudged?: number;
-  subjectsTotal?: number;
+  /** `null` when the session has no scope; the opening page treats it the same as "unknown total". */
+  subjectsTotal?: number | null;
 }
 
 export function QuestionnaireOpeningPage(props: QuestionnaireOpeningPageProps) {

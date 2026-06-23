@@ -44,6 +44,7 @@ export function App() {
     currentAnswers,
     currentSubject,
     hasSession,
+    isStatsLoaded,
     refreshStats,
     restoreCurrent,
     setCurrent,
@@ -134,15 +135,17 @@ export function App() {
   //    loading. We derive that from the *data* rather than from the
   //    `status` string (which is mutated in an effect and therefore lags
   //    one render behind the data). Concretely, we wait until both
-  //    `stats.total >= 0` (sentinel-clear stats) and
+  //    `isStatsLoaded` (stats are no longer at their sentinel) and
   //    `currentSubject !== undefined` (sentinel-clear subject) hold.
   //    Without this, `unjudged === 0` would briefly look true while stats
-  //    are still at the `-1` sentinel, flashing NoSubjectRemaining; and
+  //    are still at the sentinel, flashing NoSubjectRemaining; and
   //    `currentSubject === null` would briefly look like "session but no
-  //    subject", flashing OpeningPage.
+  //    subject", flashing OpeningPage. We can no longer gate on
+  //    `stats.total >= 0` since `total === null` is a valid resolved
+  //    state for sessions without a scope.
   const sessionResolving = clientSession === undefined;
   const sessionDataLoading =
-    hasSession && (stats.total < 0 || currentSubject === undefined);
+    hasSession && (!isStatsLoaded || currentSubject === undefined);
   const isReady = !sessionResolving && !sessionDataLoading;
 
   if (!isReady) {

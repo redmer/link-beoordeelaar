@@ -33,19 +33,50 @@ export async function datasetsStats(
     return { status: 400, body: "Invalid filter JSON." };
   }
 
-  const baseClauses = ["c.datasetId = @datasetId", "c.type = 'subject'"];
-  const parameters: { name: string; value: JSONValue }[] = [
-    { name: "@datasetId", value: datasetId },
-  ];
-  const filteredClauses = [...baseClauses];
+  const scopeRaw = request.query.get("scope");
+  const scope = parseFilterParam(scopeRaw);
+  if (scopeRaw && !scope) {
+    return { status: 400, body: "Invalid scope JSON." };
+  }
 
+  // We build two independent query specs, each with their own parameter
+  // list, so the parameter indices produced by buildFilter() don't collide
+  // when both `scope` and `filter` are supplied. Sharing one array (as the
+  // previous version did) silently bound the second filter's parameters to
+  // the first filter's parameter names, producing wrong counts whenever a
+  // request carried both predicates.
+  const baseClauses = ["c.datasetId = @datasetId", "c.type = 'subject'"];
+  const baseParam = { name: "@datasetId", value: datasetId as JSONValue };
+
+  // unjudged = subjects matching the full session filter (scope + still-todo).
+  const unjudgedClauses = [...baseClauses];
+  const unjudgedParameters: { name: string; value: JSONValue }[] = [baseParam];
   if (filter) {
     const extra = buildFilter(filter);
     if ("error" in extra) {
       return { status: 400, body: extra.error };
     }
-    filteredClauses.push(extra.clause);
-    parameters.push(...extra.parameters);
+    unjudgedClauses.push(extra.clause);
+    unjudgedParameters.push(...extra.parameters);
+  }
+
+  // total = subjects matching the session's *scope*. Without a scope we
+  // intentionally don't return a `total`: the dataset-wide count is not a
+  // useful denominator for a scoped session (it would make the progress bar
+  // measure "fraction of dataset outside this queue" rather than "fraction
+  // judged within this queue"). The frontend treats `total === null` as
+  // "no progress bar".
+  let totalQuery: SqlQuerySpec | null = null;
+  if (scope) {
+    const extra = buildFilter(scope);
+    if ("error" in extra) {
+      return { status: 400, body: extra.error };
+    }
+    const totalClauses = [...baseClauses, extra.clause];
+    totalQuery = {
+      query: `SELECT VALUE COUNT(1) FROM c WHERE ${totalClauses.join(" AND ")}`,
+      parameters: [baseParam, ...extra.parameters],
+    };
   }
 
   let container: Container;
@@ -56,18 +87,13 @@ export async function datasetsStats(
     return { status: 500, body: "Cosmos DB configuration is missing." };
   }
 
-  const filteredWhere = filteredClauses.join(" AND ");
-  const totalQuery: SqlQuerySpec = {
-    query: `SELECT VALUE COUNT(1) FROM c WHERE ${baseClauses.join(" AND ")}`,
-    parameters,
-  };
   const unjudgedQuery: SqlQuerySpec = {
-    query: `SELECT VALUE COUNT(1) FROM c WHERE ${filteredWhere}`,
-    parameters,
+    query: `SELECT VALUE COUNT(1) FROM c WHERE ${unjudgedClauses.join(" AND ")}`,
+    parameters: unjudgedParameters,
   };
 
   const [total, unjudged] = await Promise.all([
-    countSubjects(container, totalQuery),
+    totalQuery ? countSubjects(container, totalQuery) : Promise.resolve(null),
     countSubjects(container, unjudgedQuery),
   ]);
 

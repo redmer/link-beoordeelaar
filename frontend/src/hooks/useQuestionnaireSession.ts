@@ -15,12 +15,28 @@ interface UseQuestionnaireSessionOptions {
 }
 
 interface StatsState {
-  total: number;
+  /**
+   * `-1` is a sentinel meaning "not yet loaded". After load it is either
+   * a non-negative count (when the session declared a scope) or `null`
+   * (when there is no scope and the progress bar should stay hidden).
+   */
+  total: number | null;
   unjudged: number;
 }
 
 function toStatsState(stats: DatasetStatsResp): StatsState {
   return { total: stats.total, unjudged: stats.unjudged };
+}
+
+/**
+ * Returns true once stats have been resolved by the server. We can't just
+ * check `total >= 0` anymore because a successful response may legitimately
+ * carry `total: null` (no scope declared); but `unjudged` is always a
+ * non-negative number after a successful fetch, so we use the `-1` sentinel
+ * on `unjudged` to distinguish "still loading" from "loaded, no scope".
+ */
+function isStatsLoaded(stats: StatsState): boolean {
+  return stats.unjudged >= 0;
 }
 
 export function useQuestionnaireSession({
@@ -29,10 +45,12 @@ export function useQuestionnaireSession({
   setLoading,
   setReady,
 }: UseQuestionnaireSessionOptions) {
-  // `stats.total === -1` is a sentinel meaning "not yet loaded". Callers in
-  // App.tsx must gate on `stats.total >= 0` before rendering anything that
-  // relies on real numbers, otherwise pages such as NoSubjectRemaining
-  // ("unjudged === 0") would flash with bogus data.
+  // `stats.unjudged === -1` is the "not yet loaded" sentinel. Callers in
+  // App.tsx must gate on `isStatsLoaded(stats)` before rendering anything
+  // that relies on real numbers, otherwise pages such as NoSubjectRemaining
+  // ("unjudged === 0") would flash with bogus data. We can't sentinel on
+  // `total` since `total === null` is now a valid resolved state (session
+  // without a scope).
   const [stats, setStats] = useState<StatsState>({ total: -1, unjudged: -1 });
 
   const [currentSubject, setCurrentSubject] = useState<
@@ -111,6 +129,7 @@ export function useQuestionnaireSession({
     currentAnswers,
     currentSubject,
     hasSession,
+    isStatsLoaded: isStatsLoaded(stats),
     refreshStats,
     restoreCurrent,
     setCurrent,

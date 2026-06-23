@@ -6,7 +6,11 @@ import { PageHeader } from "./PageHeader.js";
 export interface PageFrameProps extends PropsWithChildren {
   diagnostics?: string;
   status?: "ready" | "error" | "loading";
-  totalSubjects?: number;
+  /**
+   * `null` means "no scope declared", which suppresses the progress bar
+   * and leaves only the "X remaining" label visible.
+   */
+  totalSubjects?: number | null;
   unjudgedSubjects?: number;
 }
 

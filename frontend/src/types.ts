@@ -38,7 +38,15 @@ export interface SubjectNextResp {
 }
 
 export interface DatasetStatsResp {
-  total: number;
+  /**
+   * Number of subjects that fall within the session's *scope* (the
+   * denominator of the progress bar). `null` when the session did not
+   * declare a scope — in that case the frontend hides the progress bar
+   * and only shows the "X remaining" label, because the dataset-wide
+   * total isn't a meaningful denominator for a scoped queue.
+   */
+  total: number | null;
+  /** Number of subjects still matching the full session filter. */
   unjudged: number;
 }
 
