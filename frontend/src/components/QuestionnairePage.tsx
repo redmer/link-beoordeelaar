@@ -39,6 +39,14 @@ export function QuestionnairePage(props: QuestionnairePageProps) {
   );
 }
 
+export function QuestionnaireLoading() {
+  return (
+    <div className="page page-centered">
+      <Hero title={`${label("LOADING_TITLE")}`} desc={label("LOADING_DESC")} />
+    </div>
+  );
+}
+
 export function QuestionnaireNoSubjectRemaining() {
   return (
     <div className="page page-centered">

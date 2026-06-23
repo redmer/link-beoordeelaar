@@ -8,8 +8,8 @@ export interface HistoryEntry {
 }
 
 interface UseSubmissionManagerOptions {
-  clientSession: ClientSession;
-  currentSubject: SubjectWithAnswers | null;
+  clientSession: ClientSession | null | undefined;
+  currentSubject: SubjectWithAnswers | null | undefined;
   onHistoryPush: (entry: HistoryEntry) => void;
   onSubjectAdvance: (subject: SubjectWithAnswers | null) => void;
   onSubmitFailure: (error: unknown) => void;
@@ -54,6 +54,9 @@ export function useSubmissionManager({
       event.preventDefault();
       bumpFormKey();
       if (!currentSubject) return;
+      if (!clientSession) return;
+
+      const session = clientSession;
 
       onSubmitStart();
 
@@ -72,7 +75,7 @@ export function useSubmissionManager({
       // we abort the chain via `throw` and the user stays on the same
       // subject without a stale "back" entry pointing at a never-saved
       // submission.
-      saveAnswer({ answers, subject: submittedSubject, clientSession })
+      saveAnswer({ answers, subject: submittedSubject, clientSession: session })
         .then(() => {
           setSaveError("");
           onHistoryPush({ subjectId: submittedSubject.id, answers });
@@ -85,7 +88,7 @@ export function useSubmissionManager({
           console.error(error);
           throw error;
         })
-        .then(() => fetchNextSubject(clientSession))
+        .then(() => fetchNextSubject(session))
         .then((response) => {
           onSubjectAdvance(response?.subject ?? null);
           onSubmitSuccess();

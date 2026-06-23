@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Page } from "../components/Page.js";
 import {
+  QuestionnaireLoading,
   QuestionnaireNoSubjectRemaining,
   QuestionnaireOpeningPage,
   QuestionnairePage,
@@ -21,8 +22,8 @@ export function App() {
     useAppLoadState();
 
   useEffect(() => {
-    document.body.lang = clientSession.lang ?? "";
-  }, [clientSession.lang]);
+    document.body.lang = clientSession?.lang ?? document.body.lang;
+  }, [clientSession?.lang]);
 
   // Monotonic counter used as the questionnaire form's remount key. Bumped
   // on every event that should clear uncontrolled answer inputs (submission
@@ -121,8 +122,40 @@ export function App() {
     .filter((value) => value !== "")
     .join("\n");
 
+  // Top-level loading guard. We render the loading shell whenever any of
+  // the following is still being resolved:
+  //
+  // 1. `clientSession === undefined` — the session provider has not yet
+  //    decided whether the page has a session at all. Without this guard
+  //    the very first paint would classify the user as "sessionless" and
+  //    flash QuestionnaireSessionlessPage before the fetch even starts.
+  //
+  // 2. We have a session, but the in-session data has not finished
+  //    loading. We derive that from the *data* rather than from the
+  //    `status` string (which is mutated in an effect and therefore lags
+  //    one render behind the data). Concretely, we wait until both
+  //    `stats.total >= 0` (sentinel-clear stats) and
+  //    `currentSubject !== undefined` (sentinel-clear subject) hold.
+  //    Without this, `unjudged === 0` would briefly look true while stats
+  //    are still at the `-1` sentinel, flashing NoSubjectRemaining; and
+  //    `currentSubject === null` would briefly look like "session but no
+  //    subject", flashing OpeningPage.
+  const sessionResolving = clientSession === undefined;
+  const sessionDataLoading =
+    hasSession && (stats.total < 0 || currentSubject === undefined);
+  const isReady = !sessionResolving && !sessionDataLoading;
+
+  if (!isReady) {
+    console.debug(`Loading...`);
+    return (
+      <Page status={effectiveStatus} diagnostics={diagnostics}>
+        <QuestionnaireLoading />
+      </Page>
+    );
+  }
+
   if (!hasSession) {
-    console.debug(`!hasSession`);
+    console.debug(`No session detected yet...`);
     return (
       <Page
         status={effectiveStatus}
@@ -135,8 +168,8 @@ export function App() {
     );
   }
 
-  if (stats.unjudged < 1) {
-    console.debug(`stats.unjudged < 1`);
+  if (stats.unjudged == 0) {
+    console.debug(`No unjudged items left...`);
     return (
       <Page
         status={effectiveStatus}
@@ -150,7 +183,7 @@ export function App() {
   }
 
   if (started && !!currentSubject) {
-    console.debug(`if (started && !!currentSubject)`);
+    console.debug(`Started and there's a subject...`);
     return (
       <Page
         status={effectiveStatus}
@@ -161,7 +194,10 @@ export function App() {
         <QuestionnairePage
           onClick={onReopenPopup}
           onSubmit={onSubmit}
-          questions={clientSession.questions}
+          // `hasSession` was true above, which is derived from
+          // `clientSession?.links.next`, so `clientSession` is guaranteed
+          // non-null here.
+          questions={clientSession!.questions}
           answers={currentAnswers}
           subject={currentSubject}
           formKey={formKey}

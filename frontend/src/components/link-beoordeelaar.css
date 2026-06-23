@@ -101,7 +101,7 @@ main.app {
 }
 
 .page-centered {
-  margin: auto 0;
+  margin-top: 15vh;
 }
 
 .status-bar {
