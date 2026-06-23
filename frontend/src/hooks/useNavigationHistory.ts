@@ -4,7 +4,14 @@ import type { Answers, ClientSession, SubjectWithAnswers } from "../types.js";
 import type { HistoryEntry } from "./useSubmissionManager.js";
 
 interface UseNavigationHistoryOptions {
-  clientSession: ClientSession;
+  /**
+   * The active client session. Accepts the tri-state value from
+   * `ClientSessionContext` (`undefined` while resolving, `null` when
+   * sessionless). The popstate handler only fires after the user has
+   * navigated forward at least once, by which time a real session is
+   * guaranteed; the wider type just propagates the context type honestly.
+   */
+  clientSession: ClientSession | null | undefined;
   onRestore: (subject: SubjectWithAnswers, answers: Answers) => void;
   onRestoreFailure: (error: unknown) => void;
   onRestoreStart: () => void;
@@ -60,6 +67,8 @@ export function useNavigationHistory({
       setSubjectHistory(historyRef.current);
 
       const handlers = handlersRef.current;
+      const session = handlers.clientSession;
+      if (!session) return;
       handlers.onRestoreStart();
 
       // Push a fresh state entry so any "forward" history entries (which
@@ -73,7 +82,7 @@ export function useNavigationHistory({
       );
 
       fetchSubject({
-        clientSession: handlers.clientSession,
+        clientSession: session,
         subject: { id: last.subjectId },
       })
         .then((subject) => {

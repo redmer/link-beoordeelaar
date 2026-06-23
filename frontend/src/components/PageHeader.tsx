@@ -18,7 +18,7 @@ export function PageHeader({
   status,
 }: PageHeaderProps) {
   const clientSession = useContext(ClientSessionContext);
-  const helpLink = help ?? clientSession.links.help ?? label("HELP_URL");
+  const helpLink = help ?? clientSession?.links.help ?? label("HELP_URL");
 
   return (
     <header className="colophon status-bar" data-status={status ?? "ready"}>
