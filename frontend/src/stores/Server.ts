@@ -22,8 +22,18 @@ export async function fetchNextSubject(
 
 export async function fetchDatasetStats(
   clientSession: ClientSession,
+  options: { includeTotal?: boolean } = {},
 ): Promise<DatasetStatsResp> {
+  const { includeTotal = true } = options;
   const url = new URL(clientSession.links.next);
+  // Drop the `scope` query param when the caller only needs `unjudged`.
+  // The backend treats a missing `scope` as "don't compute the total" and
+  // returns `total: null`, which is materially cheaper than running the
+  // (often expensive) scope COUNT query on every submission. Callers that
+  // already cached `total` from the initial load reuse it client-side.
+  if (!includeTotal) {
+    url.searchParams.delete("scope");
+  }
   const datasetBase = clientSession.links.next.split("/next-subject", 1)[0];
   const resp = await fetch(`${datasetBase}/stats${url.search}`);
   return await resp.json();

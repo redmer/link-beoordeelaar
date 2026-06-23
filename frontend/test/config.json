@@ -48,7 +48,7 @@
     }
   ],
   "links": {
-    "next": "http://localhost:7071/api/datasets/89bcda59-ef9a-4690-aaff-e0b91a82e758/next-subject?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22or%22%3A%5B%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q1%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D%5D%7D",
+    "next": "http://localhost:7071/api/datasets/89bcda59-ef9a-4690-aaff-e0b91a82e758/next-subject?filter=%7B%22and%22%3A%5B%7B%22not%22%3A%7B%22contains%22%3A%7B%22field%22%3A%22answers.q1%22%2C%22value%22%3A%22delete%22%7D%7D%7D%2C%7B%22or%22%3A%5B%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q1%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q2%22%7D%7D%7D%2C%7B%22not%22%3A%7B%22exists%22%3A%7B%22field%22%3A%22answers.q3%22%7D%7D%7D%5D%7D%5D%7D&scope=%7B%22contains%22%3A%7B%22field%22%3A%22url%22%2C%22value%22%3A%22%3A%2F%2F%22%7D%7D",
     "help": "mailto:noreply@example.com"
   },
   "raw": {
@@ -63,6 +63,9 @@
           ]
         }
       ]
+    },
+    "raw.link.next.scope": {
+      "contains": { "field": "url", "value": "://" }
     }
   }
 }

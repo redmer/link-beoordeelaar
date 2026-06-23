@@ -66,8 +66,18 @@ export function useQuestionnaireSession({
 
   const refreshStats = useCallback(async () => {
     if (!clientSession) return;
-    const statsResp = await fetchDatasetStats(clientSession);
-    setStats(toStatsState(statsResp));
+    // Only re-fetch `unjudged` here. `total` is the size of the session's
+    // scope (a fixed property of the queue) and was cached on the initial
+    // load; recomputing it on every submission was a measurable cost on
+    // large datasets. We merge the cached `total` back in so consumers
+    // continue to see a complete StatsState.
+    const statsResp = await fetchDatasetStats(clientSession, {
+      includeTotal: false,
+    });
+    setStats((prev) => ({
+      total: prev.total,
+      unjudged: statsResp.unjudged,
+    }));
   }, [clientSession]);
 
   const setCurrent = useCallback(
