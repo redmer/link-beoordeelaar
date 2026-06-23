@@ -1,0 +1,63 @@
+name: Deploy GitHub Pages
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+concurrency:
+    group: pages
+    cancel-in-progress: false
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 22
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build frontend
+              run: npm --workspace frontend run build
+
+            - name: Assemble Pages site
+              run: |
+                  mkdir -p _site
+                  cp -r docs/. _site/
+                  cp frontend/index.html _site/index.html
+                  cp -r frontend/dist _site/dist
+                  # Include CSS referenced from frontend/index.html (src/components/link-beoordeelaar.css)
+                  mkdir -p _site/src/components
+                  cp frontend/src/components/link-beoordeelaar.css _site/src/components/link-beoordeelaar.css
+
+            - name: Setup Pages
+              uses: actions/configure-pages@v6
+
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v5
+              with:
+                  path: _site
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v5
