@@ -140,8 +140,13 @@ Supported operators:
 
 - `and` / `or` / `not`
 - `eq`: field equals value
-- `contains`: field is an array that contains value
+- `contains`: field is a string containing the value as a substring,
+  or an array containing the value as an element
 - `exists`: field is defined
+- `in`: field equals any of the listed values (use this instead of an
+  `or` of many `eq`s — it is dramatically smaller on the wire)
+- `between`: field is in an inclusive `[min, max]` range; either bound
+  may be omitted to make the range half-open
 
 Allowed fields:
 
@@ -182,6 +187,44 @@ URL-encoded (for `?filter=`):
 ```json
 { "exists": { "field": "answers.q2" } }
 ```
+
+#### `in` example
+
+"Give me subjects whose `metadata.subjectDate` is one of these years."
+
+```json
+{
+  "in": {
+    "field": "metadata.subjectDate",
+    "values": ["1966", "1967", "1968", "1969", "1970"]
+  }
+}
+```
+
+This is equivalent to an `or` of `eq` clauses but produces a much shorter
+URL — prefer it whenever you have more than two or three values, since
+the encoded `or`/`eq` form grows quadratically in URI length and can hit
+the server's URI-length limit.
+
+#### `between` example
+
+"Give me subjects whose `metadata.subjectDate` is between 1966 and 2025
+(inclusive)."
+
+```json
+{
+  "between": {
+    "field": "metadata.subjectDate",
+    "min": "1966",
+    "max": "2025"
+  }
+}
+```
+
+Either `min` or `max` may be omitted to express a half-open range
+(`>= min` only, or `<= max` only). Both bounds being absent is rejected.
+String comparison uses Cosmos' lexicographic order, so it works for
+zero-padded years and ISO-8601 dates but not for free-form strings.
 
 ## Generate Session Key
 

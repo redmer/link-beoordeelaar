@@ -8,7 +8,9 @@ export type FilterExpression =
   | { not: FilterExpression }
   | { exists: { field: string } }
   | { eq: { field: string; value: FilterValue } }
-  | { contains: { field: string; value: FilterValue } };
+  | { contains: { field: string; value: FilterValue } }
+  | { in: { field: string; values: FilterValue[] } }
+  | { between: { field: string; min?: FilterValue; max?: FilterValue } };
 
 export interface SubjectDoc {
   id: string;

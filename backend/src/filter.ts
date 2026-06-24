@@ -40,7 +40,7 @@ function resolveFieldPath(field: string): string | null {
   return null;
 }
 
-function addParam(state: BuildState, value: FilterValue) {
+function addParam(state: BuildState, value: JSONValue) {
   const name = `@f${state.index}`;
   state.index += 1;
   state.parameters.push({ name, value });
@@ -99,6 +99,61 @@ function parseFilterExpression(value: unknown): FilterExpression | null {
       return null;
     }
     return { exists: { field } };
+  }
+
+  if (key === "in") {
+    if (!isRecord(content)) {
+      return null;
+    }
+    const field = content.field;
+    const values = content.values;
+    if (typeof field !== "string" || !Array.isArray(values)) {
+      return null;
+    }
+    // Reject empty lists: their semantics are confusing (always-false?
+    // always-true?) and almost always indicate a frontend bug. Callers can
+    // express "match nothing" more clearly if they ever need to.
+    if (values.length === 0) {
+      return null;
+    }
+    if (!values.every(isFilterValue)) {
+      return null;
+    }
+    return { in: { field, values } };
+  }
+
+  if (key === "between") {
+    if (!isRecord(content)) {
+      return null;
+    }
+    const field = content.field;
+    if (typeof field !== "string") {
+      return null;
+    }
+    const hasMin = "min" in content && content.min !== undefined;
+    const hasMax = "max" in content && content.max !== undefined;
+    if (!hasMin && !hasMax) {
+      // An open-on-both-ends `between` is just `exists`. Reject it so
+      // callers don't accidentally construct a no-op clause that they
+      // *think* is restrictive.
+      return null;
+    }
+    if (hasMin && !isFilterValue(content.min)) {
+      return null;
+    }
+    if (hasMax && !isFilterValue(content.max)) {
+      return null;
+    }
+    const out: { field: string; min?: FilterValue; max?: FilterValue } = {
+      field,
+    };
+    if (hasMin) {
+      out.min = content.min as FilterValue;
+    }
+    if (hasMax) {
+      out.max = content.max as FilterValue;
+    }
+    return { between: out };
   }
 
   return null;
@@ -172,6 +227,45 @@ function buildExpression(
       `((IS_STRING(${fieldPath}) AND CONTAINS(${fieldPath}, ${paramName})) ` +
       `OR (IS_ARRAY(${fieldPath}) AND ARRAY_CONTAINS(${fieldPath}, ${paramName})))`
     );
+  }
+
+  if ("in" in expr) {
+    const fieldPath = resolveFieldPath(expr.in.field);
+    if (!fieldPath) {
+      return null;
+    }
+    // The whole list travels as a single Cosmos parameter (a JSON array).
+    // This is dramatically cheaper on the wire than the equivalent
+    // OR-of-eq fan-out, and it stays well under Cosmos' 256-parameter
+    // per-query cap regardless of list length.
+    //
+    // ARRAY_CONTAINS(values, x) returns false when `x` is undefined, so
+    // `NOT in(...)` correctly matches documents where the field is missing
+    // (consistent with how `eq` behaves under NOT).
+    const paramName = addParam(state, expr.in.values as JSONValue);
+    return `ARRAY_CONTAINS(${paramName}, ${fieldPath})`;
+  }
+
+  if ("between" in expr) {
+    const fieldPath = resolveFieldPath(expr.between.field);
+    if (!fieldPath) {
+      return null;
+    }
+    // Guard with IS_DEFINED for the same reason `eq` does: comparisons
+    // against an undefined property in Cosmos yield `undefined`, which
+    // makes NOT-wrapping behave unintuitively. With the guard,
+    // `NOT between(...)` matches missing-or-out-of-range, which is what
+    // callers expect.
+    const parts: string[] = [`IS_DEFINED(${fieldPath})`];
+    if (expr.between.min !== undefined) {
+      const p = addParam(state, expr.between.min);
+      parts.push(`${fieldPath} >= ${p}`);
+    }
+    if (expr.between.max !== undefined) {
+      const p = addParam(state, expr.between.max);
+      parts.push(`${fieldPath} <= ${p}`);
+    }
+    return `(${parts.join(" AND ")})`;
   }
 
   return null;
